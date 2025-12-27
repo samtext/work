@@ -13,7 +13,6 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
     const number = req.body.phoneNumber.replace(/^0/, ''); // remove leading 0 if any
     const phoneNumber = `254${number}`;
     const amount = req.body.amount;
-    const serviceName = req.body.serviceName || "Xeco Service";
     const timestamp = getTimeStamp();
 
     // Get access_token properly (req.authData must be set by middleware)
@@ -39,8 +38,8 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
       "PartyB": "4938110",
       "PhoneNumber": phoneNumber,
       "CallBackURL": callbackURL,  // Ensure the callback URL is set correctly
-      "AccountReference": serviceName.replace(/\s+/g, ''), // Use service name without spaces
-      "TransactionDesc": serviceName
+      "AccountReference": "CMT1234RT",
+      "TransactionDesc": "Unlimited Internet"
     };
 
     // STK PUSH Request
