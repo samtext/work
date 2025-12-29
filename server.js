@@ -71,7 +71,6 @@ const ipWhitelist = (req, res, next) => {
         sendAlert(clientIp); // Triggers the Auri Pay email alert
         res.status(403).send(`
             <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
-                <h1 style="color:red;">403 Forbidden</h1>
                 <h1>Page Not Found</h1>
             </div>
         `);
