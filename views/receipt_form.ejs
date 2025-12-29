@@ -13,34 +13,33 @@
         :root { --auri-green: #007f3f; --auri-blue: #1a4a8e; --auri-red: #dc3545; }
         body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
         
-        /* GENERATOR UI (STAYS AS IS) */
+        /* GENERATOR UI (AS SHOWN IN YOUR UPLOAD) */
         .receipt-wrapper { width: 100%; max-width: 380px; margin: 15px auto; padding: 0 10px; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: #fff; }
-        #status-banner { background-color: var(--auri-red); color: white; padding: 12px; font-weight: 800; text-align: center; text-transform: uppercase; font-size: 1rem; transition: background-color 0.8s ease; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); background: #fff; overflow: hidden; }
+        #status-banner { background-color: var(--auri-red); color: white; padding: 12px; font-weight: 800; text-align: center; text-transform: uppercase; font-size: 1rem; }
         .dots::after { content: ''; animation: blink 1.5s infinite step-start; }
         @keyframes blink { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
-        .logo-box { font-size: 2.2rem; font-weight: 900; display: flex; justify-content: center; align-items: center; }
+        .logo-box { font-size: 2.2rem; font-weight: 900; display: flex; justify-content: center; align-items: center; margin-top: 10px; }
         .logo-p { color: var(--auri-blue); }
         .logo-arrow { color: var(--auri-green); margin-left: -5px; }
-        .btn-main { background-color: #000; color: #fff; border: none; padding: 12px; font-weight: 700; border-radius: 6px; font-size: 0.9rem; }
-        .btn-sub { background-color: #fff; border: 1.5px solid #000; color: #000; padding: 12px; font-weight: 700; border-radius: 6px; font-size: 0.9rem; }
-        .btn-share { background-color: var(--auri-green); color: #fff; border: none; padding: 12px; font-weight: 700; border-radius: 6px; font-size: 0.9rem; }
+        .btn-main { background-color: #000; color: #fff; border: none; padding: 12px; font-weight: 700; border-radius: 6px; }
+        .btn-sub { background-color: #fff; border: 1.5px solid #000; color: #000; padding: 12px; font-weight: 700; border-radius: 6px; }
         .form-label { font-size: 0.7rem; font-weight: 800; color: #666; text-transform: uppercase; margin-bottom: 4px; }
-        .form-control-receipt { border: 1px solid #e0e0e0; padding: 10px; font-weight: 700; font-size: 0.95rem; border-radius: 6px; }
+        .form-control-receipt { border: 1px solid #e0e0e0; padding: 10px; font-weight: 700; font-size: 0.95rem; border-radius: 6px; background-color: #f9f9f9; }
 
-        /* OFFICIAL RECEIPT DESIGN (HIDDEN TEMPLATE FOR EXPORT) */
-        #official-receipt-template { 
-            width: 450px; background: white; position: absolute; left: -9999px; top: 0; padding-bottom: 40px;
+        /* THE RECEIPT STYLE YOU REQUESTED (HIDDEN FROM UI) */
+        #official-receipt-style { 
+            width: 450px; background: white; position: absolute; left: -9999px; top: 0; padding-bottom: 30px;
         }
-        .rec-header { background: var(--auri-green); color: white; padding: 18px; text-align: center; font-weight: bold; font-size: 1.5rem; }
-        .rec-body { padding: 40px; text-align: center; }
-        .rec-company { font-weight: 900; font-size: 1.4rem; margin-top: 15px; margin-bottom: 5px; color: #000; }
-        .rec-date { font-size: 0.9rem; color: #333; margin-bottom: 10px; }
-        .rec-label { font-size: 0.85rem; color: #555; margin-top: 15px; }
-        .rec-id-box { border: 1.5px dashed #333; padding: 15px; border-radius: 12px; font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 1rem; margin: 5px 0 25px 0; word-break: break-all; }
-        .rec-table { width: 100%; border-top: 1.5px dashed #000; margin-top: 15px; padding-top: 15px; font-family: 'Courier New', Courier, monospace; text-align: left; }
-        .rec-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; }
-        .rec-footer { font-size: 0.75rem; font-weight: 900; margin-top: 25px; text-transform: uppercase; letter-spacing: 1px; color: #000; }
+        .r-header { background: var(--auri-green); color: white; padding: 18px; text-align: center; font-weight: bold; font-size: 1.6rem; }
+        .r-body { padding: 35px; text-align: center; }
+        .r-company { font-weight: 900; font-size: 1.4rem; margin-top: 10px; color: #000; text-transform: uppercase; }
+        .r-date { font-size: 0.85rem; color: #333; margin-bottom: 15px; }
+        .r-id-label { font-size: 0.8rem; color: #555; font-weight: bold; }
+        .r-id-box { border: 2px dashed #444; padding: 18px; border-radius: 15px; font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 1rem; margin: 5px 0 25px 0; word-break: break-all; }
+        .r-table { width: 100%; border-top: 1.5px dashed #000; margin-top: 15px; padding-top: 15px; font-family: 'Courier New', Courier, monospace; text-align: left; }
+        .r-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1.05rem; }
+        .r-footer { font-size: 0.75rem; font-weight: 900; margin-top: 25px; text-transform: uppercase; letter-spacing: 1.5px; }
     </style>
 </head>
 <body>
@@ -48,78 +47,70 @@
 <div class="receipt-wrapper">
     <div class="card">
         <div id="status-banner">Processing Receipt<span class="dots"></span></div>
-        
         <div class="p-4">
             <div class="text-center mb-3">
                 <div class="logo-box"><span class="logo-p">P</span><span class="logo-arrow">➤</span></div>
                 <h5 class="fw-bold m-0">AURI ONLINE SERVICES</h5>
-                <p class="text-muted small mb-0" id="live-clock">Loading...</p>
+                <p class="text-muted small mb-0" id="ui-clock"></p>
             </div>
             
             <div class="mb-3 text-center">
                 <label class="form-label">Transaction ID</label>
-                <div style="border: 1.5px dashed #ccc; padding: 10px; border-radius: 10px; background: #fafafa; font-family: monospace; font-weight: bold; font-size: 0.85rem;">
-                    <%= checkoutId %>
-                </div>
+                <div style="border: 1px dashed #ccc; padding: 8px; border-radius: 8px; background: #fafafa; font-family: monospace; font-size: 0.8rem; font-weight: bold;"><%= checkoutId %></div>
             </div>
 
             <div class="row mb-3 g-2">
                 <div class="col-7">
                     <label class="form-label">Telephone</label>
-                    <input type="text" id="utel" class="form-control form-control-receipt bg-light" readonly placeholder="...">
+                    <input type="text" id="utel" class="form-control form-control-receipt" readonly placeholder="...">
                 </div>
                 <div class="col-5">
                     <label class="form-label">Amount</label>
-                    <input type="text" id="uamount" class="form-control form-control-receipt bg-light" readonly placeholder="...">
+                    <input type="text" id="uamount" class="form-control form-control-receipt" readonly placeholder="...">
                 </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Full Name</label>
-                <input type="text" id="fname" class="form-control form-control-receipt" placeholder="e.g. Samuel Chaga">
+                <input type="text" id="fname" class="form-control form-control-receipt" style="background-color: white;" placeholder="e.g. Samuel Chaga">
             </div>
 
             <div class="mb-4">
                 <label class="form-label">Email Address</label>
-                <input type="email" id="uemail" class="form-control form-control-receipt" placeholder="customer@mail.com">
+                <input type="email" id="uemail" class="form-control form-control-receipt" style="background-color: white;" placeholder="customer@mail.com">
             </div>
 
             <div class="d-grid gap-2">
-                <button class="btn btn-main" onclick="validateAndProcess('pdf')">DOWNLOAD PDF</button>
-                <button class="btn btn-sub" onclick="validateAndProcess('jpeg')">DOWNLOAD JPEG</button>
-                <button class="btn btn-share" onclick="validateAndProcess('share')">SHARE RECEIPT</button>
+                <button class="btn btn-main" onclick="processReceipt('pdf')">DOWNLOAD PDF</button>
+                <button class="btn btn-sub" onclick="processReceipt('jpeg')">DOWNLOAD JPEG</button>
             </div>
             
-            <div class="text-center mt-4">
-                <p style="font-size: 0.65rem; font-weight: 800; color: #444; letter-spacing: 1px;">Powered by XECO PAY</p>
-            </div>
+            <p class="text-center mt-4 mb-0" style="font-size: 0.7rem; font-weight: 900; color: #444;">VERIFIED BY XECO PAY</p>
         </div>
     </div>
 </div>
 
-<div id="official-receipt-template">
-    <div class="rec-header">RECEIPT PAID</div>
-    <div class="rec-body">
-        <div class="rec-company">AURI ONLINE SERVICES</div>
-        <div class="rec-date" id="r-date"></div>
+<div id="official-receipt-style">
+    <div class="r-header">RECEIPT PAID</div>
+    <div class="r-body">
+        <div class="r-company">AURI ONLINE SERVICES</div>
+        <div class="r-date" id="r-out-date"></div>
         
-        <div class="rec-label">Transaction ID</div>
-        <div class="rec-id-box"><%= checkoutId %></div>
+        <div class="r-id-label">Transaction ID</div>
+        <div class="r-id-box"><%= checkoutId %></div>
 
-        <div class="rec-table">
-            <div class="rec-row"><span>Customer Name</span><span id="r-name"></span></div>
-            <div class="rec-row"><span>Phone Number</span><span id="r-phone"></span></div>
+        <div class="r-table">
+            <div class="r-row"><span>Customer:</span><span id="r-out-name"></span></div>
+            <div class="r-row"><span>Phone:</span><span id="r-out-phone"></span></div>
             <hr style="border-top: 1.5px dashed #000; margin: 15px 0;">
-            <div class="rec-row"><span>Amount</span><span id="r-amt"></span></div>
-            <div class="rec-row"><span>Tax</span><span>0.00 KES</span></div>
-            <div class="rec-row" style="font-weight: 900; font-size: 1.1rem; margin-top: 8px;">
-                <span>Total</span><span id="r-total"></span>
+            <div class="r-row" style="font-weight: 900; font-size: 1.2rem;">
+                <span>TOTAL:</span><span id="r-out-total"></span>
             </div>
             <hr style="border-top: 1.5px dashed #000; margin: 15px 0;">
         </div>
 
-        <div id="r-qr-container" class="d-flex justify-content-center mt-4"></div>
-        <div class="rec-footer">VERIFIED BY XECO PAY</div>
+        <div id="r-qr" class="d-flex justify-content-center mt-3"></div>
+        <div class="r-footer">VERIFIED BY XECO PAY</div>
     </div>
 </div>
 
@@ -127,80 +118,54 @@
 <script>
     const _supabase = supabase.createClient("<%= env.SUPABASE_URL %>", "<%= env.SUPABASE_ANON_KEY %>");
     const checkoutId = "<%= checkoutId %>";
-    let paymentLoaded = false;
+    let isPaid = false;
 
-    function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleString(); }
-    setInterval(updateClock, 1000); updateClock();
+    function startClock() { document.getElementById('ui-clock').innerText = new Date().toLocaleString(); }
+    setInterval(startClock, 1000); startClock();
 
-    async function fetchTransaction() {
+    async function checkStatus() {
         const banner = document.getElementById('status-banner');
         setTimeout(async () => {
             const { data } = await _supabase.from('transactions').select('phone_number, amount').eq('checkout_request_id', checkoutId).single();
             if (data) {
-                paymentLoaded = true;
+                isPaid = true;
                 document.getElementById('utel').value = data.phone_number;
                 document.getElementById('uamount').value = data.amount + " KES";
                 banner.innerHTML = "RECEIPT PAID"; banner.style.backgroundColor = "var(--auri-green)";
-                
-                // Generate QR code for the actual receipt only
-                new QRCode(document.getElementById("r-qr-container"), { 
-                    text: window.location.href, width: 100, height: 100 
-                });
+                new QRCode(document.getElementById("r-qr"), { text: window.location.href, width: 100, height: 100 });
             }
-        }, 5000); 
+        }, 4000); 
     }
-    window.onload = fetchTransaction;
+    window.onload = checkStatus;
 
-    async function validateAndProcess(mode) {
+    async function processReceipt(type) {
         const name = document.getElementById('fname').value;
         const email = document.getElementById('uemail').value;
 
-        if (!paymentLoaded) return alert("Still waiting for payment confirmation...");
-        if (!name || !email) return alert("Please enter Full Name and Email Address.");
+        if (!isPaid) return alert("Payment is still processing...");
+        if (!name || !email) return alert("Name and Email are required to generate the receipt.");
 
-        // Fill Template Data
-        document.getElementById('r-date').innerText = new Date().toLocaleString();
-        document.getElementById('r-name').innerText = name.toUpperCase();
-        document.getElementById('r-phone').innerText = document.getElementById('utel').value;
-        document.getElementById('r-amt').innerText = document.getElementById('uamount').value;
-        document.getElementById('r-total').innerText = document.getElementById('uamount').value;
+        // Fill receipt design
+        document.getElementById('r-out-date').innerText = new Date().toLocaleString();
+        document.getElementById('r-out-name').innerText = name.toUpperCase();
+        document.getElementById('r-out-phone').innerText = document.getElementById('utel').value;
+        document.getElementById('r-out-total').innerText = document.getElementById('uamount').value;
 
-        if (mode === 'pdf') {
-            downloadPDF(name);
+        const target = document.getElementById('official-receipt-style');
+
+        if (type === 'pdf') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'mm', format: [100, 150] });
+            const canvas = await html2canvas(target, { scale: 2 });
+            doc.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, 100, 150);
+            doc.save(`Auri_Receipt_${checkoutId}.pdf`);
         } else {
-            const canvas = await html2canvas(document.getElementById('official-receipt-template'), { scale: 3 });
-            if (mode === 'jpeg') {
-                const link = document.createElement('a');
-                link.download = `Receipt_${checkoutId}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.9);
-                link.click();
-            } else if (mode === 'share') {
-                canvas.toBlob(async (blob) => {
-                    const file = new File([blob], 'Receipt.jpg', { type: 'image/jpeg' });
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ files: [file], title: 'Auri Online Receipt' });
-                    } else { alert("Share not supported on this browser."); }
-                });
-            }
+            const canvas = await html2canvas(target, { scale: 3 });
+            const link = document.createElement('a');
+            link.download = `Auri_Receipt_${checkoutId}.jpg`;
+            link.href = canvas.toDataURL("image/jpeg", 0.9);
+            link.click();
         }
-    }
-
-    function downloadPDF(name) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ unit: 'mm', format: [100, 160] });
-        doc.setFillColor(0, 127, 63); doc.rect(0, 0, 100, 15, 'F');
-        doc.setTextColor(255); doc.setFontSize(14); doc.text("RECEIPT PAID", 50, 10, { align: "center" });
-        doc.setTextColor(0); doc.setFontSize(11); doc.text("AURI ONLINE SERVICES", 50, 25, { align: "center" });
-        doc.setFontSize(7); doc.text(new Date().toLocaleString(), 50, 30, { align: "center" });
-        doc.setLineDashPattern([2, 1], 0); doc.roundedRect(10, 38, 80, 15, 3, 3);
-        doc.text("Transaction ID", 50, 37, { align: "center" });
-        doc.setFont("courier", "bold"); doc.text(checkoutId, 50, 47, { align: "center" });
-        doc.setFont("courier", "normal"); doc.setLineDashPattern([1, 1], 0); doc.line(10, 60, 90, 60);
-        doc.text("Customer: " + name.toUpperCase(), 10, 67);
-        doc.text("Phone:    " + document.getElementById('utel').value, 10, 74);
-        doc.line(10, 80, 90, 80);
-        doc.text("TOTAL:    " + document.getElementById('uamount').value, 10, 88);
-        doc.save(`Receipt_${checkoutId}.pdf`);
     }
 </script>
 </body>
