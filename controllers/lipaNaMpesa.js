@@ -3,67 +3,47 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import { getTimeStamp } from '../utils/timestamp.utils.js';
 import { authToken } from '../middlewares/authorization.js';
-import { supabase } from '../config/supabaseClient.js'; // Added database import
+import { supabase } from '../config/supabaseClient.js'; 
 
 dotenv.config();
 const router = express.Router();
 
 router.post("/lipaNaMpesa", authToken, async (req, res) => {
   try {
-    // ------ STK PUSH SENDING REQUEST
-    const number = req.body.phoneNumber.replace(/^0/, ''); // remove leading 0 if any
+    const number = req.body.phoneNumber.replace(/[^0-9]/g, '').replace(/^0/, ''); 
     const phoneNumber = `254${number}`;
-    const amount = req.body.amount;
+    const amount = Math.floor(req.body.amount); // Ensure amount is an integer
     const timestamp = getTimeStamp();
-
-    // Get access_token properly (req.authData must be set by middleware)
     const access_token = req.authData;
-    if (!access_token) {
-      return res.status(401).json({ error: "Access token missing" });
-    }
 
-    // Callback URL: Ensure it's set correctly
-    const callbackURL = process.env.CALLBACK_URL || req.callbackUrl || 'https://af7c352a3cc7a8e8-197-232-6-149.serveousercontent.com/callback';  // Ensure the URL is correct
-    console.log('Using Callback URL:', callbackURL);
+    const callbackURL = process.env.CALLBACK_URL || 'https://af7c352a3cc7a8e8-197-232-6-149.serveousercontent.com/callback';
 
     const password = Buffer.from(`${process.env.BusinessShortCode}${process.env.MPESA_PASSKEY}${timestamp}`).toString('base64');
-    const stkUrl = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'; // Production URL
+    const stkUrl = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'; 
 
     const body = {
       "BusinessShortCode": process.env.BusinessShortCode,
       "Password": password,
       "Timestamp": timestamp,
       "TransactionType": "CustomerBuyGoodsOnline",
-      "Amount": amount,  // Use dynamic amount from form
+      "Amount": amount, 
       "PartyA": phoneNumber,
       "PartyB": "4938110",
       "PhoneNumber": phoneNumber,
-      "CallBackURL": callbackURL,  // Ensure the callback URL is set correctly
+      "CallBackURL": callbackURL,
       "AccountReference": "CMT1234RT",
       "TransactionDesc": "Unlimited Internet"
     };
 
-    // STK PUSH Request
-    console.log('STK Push Request Body:', body);
     const response = await axios.post(stkUrl, body, {
-      headers: {
-        'Authorization': `Bearer ${access_token}`,
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Authorization': `Bearer ${access_token}`, 'Content-Type': 'application/json' }
     });
 
     const stkResponse = response.data;
-    console.log('STK Push Response:', stkResponse);
-
-    // ------ Checking Status of a Transaction
-    const queryEndpoint = 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query';
-
-    let resultCode, resultDesc;
 
     if (stkResponse.ResponseCode === '0') {
       const requestID = stkResponse.CheckoutRequestID;
 
-      // DATABASE: Save the initial pending transaction
       await supabase.from('transactions').insert([{
         checkout_request_id: requestID,
         phone_number: phoneNumber,
@@ -71,6 +51,7 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
         status: 'pending'
       }]);
 
+      const queryEndpoint = 'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query';
       const queryPayload = {
         "BusinessShortCode": process.env.BusinessShortCode,
         "Password": password,
@@ -78,106 +59,32 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
         "CheckoutRequestID": requestID
       };
 
-      // Retry mechanism with longer interval (60 seconds)
       const timer = setInterval(async () => {
         try {
           const status = await axios.post(queryEndpoint, queryPayload, {
-            headers: {
-              Authorization: `Bearer ${access_token}`,
-              'Content-Type': 'application/json'
-            }
+            headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
           });
 
-          resultCode = status.data.ResultCode;
-          resultDesc = status.data.ResultDesc;
-
-          console.log('Query response:', resultCode, resultDesc);
-
-          // Handle different result codes
+          const resultCode = status.data.ResultCode;
           if (resultCode === '0') {
-            // DATABASE: Update to success
-            await supabase.from('transactions').update({ status: 'success', result_desc: resultDesc }).eq('checkout_request_id', requestID);
-            
-            // Payment successful
-            res.render('success', {
-              type: "Successful",
-              heading: "Payment Request Successful",
-              desc: "The payment request was processed successfully."
-            });
-            clearInterval(timer); // Stop querying once payment is successful
-          } else if (resultCode === '1032') {
-            // DATABASE: Update to cancelled
-            await supabase.from('transactions').update({ status: 'cancelled', result_desc: resultDesc }).eq('checkout_request_id', requestID);
-
-            // User cancelled the payment
-            res.render('failed', {
-              type: "cancelled",
-              heading: "Request cancelled by the User",
-              desc: "The user cancelled the request. Please try again and enter your pin to confirm payment."
-            });
+            await supabase.from('transactions').update({ status: 'success' }).eq('checkout_request_id', requestID);
             clearInterval(timer);
-          } else if (resultCode === '1') {
-            // DATABASE: Update to failed
-            await supabase.from('transactions').update({ status: 'failed', result_desc: resultDesc }).eq('checkout_request_id', requestID);
-
-            // Insufficient balance
-            res.render('failed', {
-              type: "failed",
-              heading: "Request failed due to insufficient balance",
-              desc: "Please deposit funds on your M-PESA or use Overdraft (Fuliza) to complete the transaction."
-            });
+            // REDIRECT TO RECEIPT
+            return res.redirect(`/receipt?checkoutId=${requestID}`);
+          } else if (resultCode) {
+            await supabase.from('transactions').update({ status: 'failed' }).eq('checkout_request_id', requestID);
             clearInterval(timer);
-          } else if (resultCode === '2029') {
-            // DATABASE: Update to failed
-            await supabase.from('transactions').update({ status: 'failed', result_desc: resultDesc }).eq('checkout_request_id', requestID);
-
-            // Failed due to an unresolved reason type
-            res.render('failed', {
-              type: "failed",
-              heading: "Payment request failed",
-              desc: `${resultDesc}. Please try again to complete the transaction.`
-            });
-            clearInterval(timer);
-          } else {
-            // DATABASE: Update for any other failure codes
-            await supabase.from('transactions').update({ status: 'failed', result_desc: resultDesc }).eq('checkout_request_id', requestID);
-
-            // Other failure codes
-            res.render('failed', {
-              type: "failed",
-              heading: "Payment request failed",
-              desc: `${resultDesc}. Please try again to complete the transaction.`
-            });
-            clearInterval(timer);
+            res.render('failed', { type: "failed", heading: "Payment Failed", desc: status.data.ResultDesc });
           }
-
-        } catch (error) {
-          console.error('Error in STK Push query:', error.response ? error.response.data : error.message);
-
-          // Log full error response
-          if (error.response) {
-            console.log('Full error response:', error.response.data);
-          }
-
-          res.render('failed', {
-            type: "failed",
-            heading: "Error sending the push request",
-            desc: error.response?.data?.errorMessage || error.message
-          });
-        }
-      }, 15000); // Retry every 15 seconds
-
+        } catch (error) { /* Polling */ }
+      }, 15000);
     }
-
   } catch (error) {
-    console.error("STK Push Error:", error.response?.data || error.message);
-    const errorData = error.response?.data;
-    const errorMessage = errorData?.errorMessage || "An error occurred";
-
-    res.render('failed', {
-      type: "failed",
-      heading: "Error sending the push request",
-      desc: errorMessage
+    console.error("M-Pesa Error:", error.response?.data || error.message);
+    res.render('failed', { 
+        type: "failed", 
+        heading: "Error", 
+        desc: error.response?.data?.errorMessage || error.message 
     });
   }
 });
