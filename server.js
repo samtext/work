@@ -72,7 +72,7 @@ const ipWhitelist = (req, res, next) => {
         res.status(403).send(`
             <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
                 <h1 style="color:red;">403 Forbidden</h1>
-                <p>Access Denied: This dashboard is restricted to the administrator's WiFi.</p>
+                <h1>Page Not Found</h1>
             </div>
         `);
     }
