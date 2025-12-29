@@ -2,212 +2,192 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Xeco Developers - Receipt</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         :root { --xeco-blue: #1a4a8e; --xeco-green: #007f3f; --xeco-red: #dc3545; }
-        .card { border-radius: 4px; border: none; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* Banner Styles */
+        /* Mobile First: Full Screen */
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #fff; }
+        .receipt-wrapper { width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        .card { border: none; border-radius: 0; flex-grow: 1; display: flex; flex-direction: column; }
+        
+        /* Desktop Adjustment */
+        @media (min-width: 576px) {
+            body { background-color: #f4f7f6; padding: 20px; }
+            .receipt-wrapper { max-width: 450px; min-height: auto; margin: auto; }
+            .card { border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        }
+
         #status-banner { 
             background-color: var(--xeco-red); 
             color: white; 
-            padding: 15px; 
+            padding: 20px; 
             font-weight: 800; 
             text-align: center; 
             text-transform: uppercase; 
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             letter-spacing: 1px;
             transition: background-color 0.8s ease;
         }
 
-        /* Dot Animation */
         .dots::after { content: ''; animation: blink 1.5s infinite step-start; }
         @keyframes blink { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
         
-        .btn-primary { background-color: #000; border: none; border-radius: 4px; }
-        .form-control:read-only { background-color: #f8f9fa; font-weight: 700; border: 1px solid #ddd; }
-        
-        .logo-box { font-size: 2.5rem; font-weight: 900; display: flex; justify-content: center; align-items: center; margin-bottom: 0; }
+        .logo-box { font-size: 3.5rem; font-weight: 900; display: flex; justify-content: center; align-items: center; margin-bottom: 0; }
         .logo-p { color: var(--xeco-blue); }
-        .logo-arrow { color: var(--xeco-green); margin-left: -5px; }
+        .logo-arrow { color: var(--xeco-green); margin-left: -8px; }
+
+        .btn-download { background-color: #000; color: #fff; border: none; padding: 15px; font-weight: bold; }
+        .btn-view { background-color: transparent; border: 2px solid #000; color: #000; padding: 15px; font-weight: bold; }
+        
+        .form-label { font-size: 0.75rem; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .form-control-lg { border-radius: 4px; border: 1px solid #ddd; font-weight: 700; }
     </style>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card bg-white">
-                    <div id="status-banner">Processing Receipt<span class="dots"></span></div>
-                    
-                    <div class="p-4">
-                        <div class="text-center mb-4">
-                            <div class="logo-box">
-                                <span class="logo-p">P</span><span class="logo-arrow">➤</span>
-                            </div>
-                            <h4 class="fw-bold m-0">Xeco Developers</h4>
-                            <p class="text-muted small">Official Payment Receipt</p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="small fw-bold text-muted">TRANSACTION ID</label>
-                            <input type="text" id="rid" class="form-control" value="<%= checkoutId %>" readonly>
-                        </div>
+<body>
 
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="small fw-bold text-muted">TELEPHONE</label>
-                                <input type="text" id="utel" class="form-control" readonly placeholder="...">
-                            </div>
-                            <div class="col">
-                                <label class="small fw-bold text-muted">AMOUNT (KES)</label>
-                                <input type="text" id="uamount" class="form-control" readonly placeholder="...">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="small fw-bold text-muted text-uppercase">Full Name</label>
-                            <input type="text" id="fname" class="form-control" placeholder="Enter name">
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="small fw-bold text-muted text-uppercase">Email Address</label>
-                            <input type="email" id="uemail" class="form-control" placeholder="name@email.com">
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary fw-bold py-2" onclick="handleReceipt()">DOWNLOAD RECEIPT</button>
-                            <button class="btn btn-outline-dark fw-bold py-2" onclick="shareReceipt()">SHARE RECEIPT</button>
-                        </div>
-                    </div>
+<div class="receipt-wrapper">
+    <div class="card" id="receipt-card">
+        <div id="status-banner">Processing Receipt<span class="dots"></span></div>
+        
+        <div class="p-4 flex-grow-1">
+            <div class="text-center mb-4">
+                <div class="logo-box">
+                    <span class="logo-p">P</span><span class="logo-arrow">➤</span>
                 </div>
+                <h4 class="fw-bold m-0">Xeco Developers</h4>
+                <p class="text-muted small">Official Payment Receipt</p>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold text-muted text-uppercase">Transaction ID</label>
+                <input type="text" id="rid" class="form-control form-control-lg bg-light" value="<%= checkoutId %>" readonly>
+            </div>
+
+            <div class="row mb-3 g-2">
+                <div class="col-7">
+                    <label class="form-label fw-bold text-muted text-uppercase">Telephone</label>
+                    <input type="text" id="utel" class="form-control form-control-lg bg-light" readonly placeholder="...">
+                </div>
+                <div class="col-5">
+                    <label class="form-label fw-bold text-muted text-uppercase">Amount</label>
+                    <input type="text" id="uamount" class="form-control form-control-lg bg-light" readonly placeholder="...">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold text-muted text-uppercase">Customer Name</label>
+                <input type="text" id="fname" class="form-control form-control-lg" placeholder="John Doe">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold text-muted text-uppercase">Email Address</label>
+                <input type="email" id="uemail" class="form-control form-control-lg" placeholder="john@example.com">
+            </div>
+
+            <div class="d-grid gap-3" id="action-buttons">
+                <button class="btn btn-download" onclick="downloadPDF()">DOWNLOAD PDF</button>
+                <button class="btn btn-view" onclick="downloadJPEG()">VIEW RECEIPT (JPEG)</button>
+            </div>
+            
+            <div class="text-center mt-auto pt-4 pb-2">
+                <small class="text-muted d-block mb-1">Powered by</small>
+                <h5 style="color: var(--xeco-blue); font-weight: 900;">XECO <span style="color: var(--xeco-green);">PAY</span></h5>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="qrcode" style="display:none;"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const _supabase = supabase.createClient("<%= env.SUPABASE_URL %>", "<%= env.SUPABASE_ANON_KEY %>");
+    
+    async function fetchDetails() {
+        const rid = document.getElementById('rid').value;
+        const banner = document.getElementById('status-banner');
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const _supabase = supabase.createClient("<%= env.SUPABASE_URL %>", "<%= env.SUPABASE_ANON_KEY %>");
+        setTimeout(async () => {
+            const { data } = await _supabase
+                .from('transactions')
+                .select('phone_number, amount')
+                .eq('checkout_request_id', rid)
+                .single();
+
+            if (data) {
+                document.getElementById('utel').value = data.phone_number;
+                document.getElementById('uamount').value = data.amount + " KES";
+                banner.innerHTML = "RECEIPT PAID";
+                banner.style.backgroundColor = "var(--xeco-green)";
+            }
+        }, 5000); 
+    }
+
+    window.onload = fetchDetails;
+
+    // DOWNLOAD AUTOMATIC JPEG
+    function downloadJPEG() {
+        const tel = document.getElementById('utel').value;
+        if(!tel || tel === "...") return alert("Processing... Please wait.");
+
+        const buttons = document.getElementById('action-buttons');
+        const card = document.getElementById('receipt-card');
+
+        buttons.style.visibility = 'hidden'; // Hide buttons for the "photo"
+
+        html2canvas(card, { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Xeco_Receipt_${Date.now()}.jpg`;
+            link.href = canvas.toDataURL("image/jpeg", 0.9);
+            link.click();
+            buttons.style.visibility = 'visible';
+        });
+    }
+
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'mm', format: [100, 150] });
+        const rid = document.getElementById('rid').value;
+        const name = document.getElementById('fname').value || 'Customer';
+        const tel = document.getElementById('utel').value;
+        const amount = document.getElementById('uamount').value;
+
+        if(!tel || tel === "...") return alert("Processing... Please wait.");
+
+        // Visual Receipt Design (Based on your Axis/Acme sample)
+        doc.setFillColor(0, 127, 63); 
+        doc.rect(0, 0, 100, 15, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.text("RECEIPT PAID", 50, 10, { align: "center" });
+
+        doc.setTextColor(0);
+        doc.setFontSize(10);
+        doc.text("XECO DEVELOPERS", 50, 25, { align: "center" });
         
-        async function loadTransactionData() {
-            const receiptId = document.getElementById('rid').value;
-            const banner = document.getElementById('status-banner');
+        doc.setLineDashPattern([2, 1], 0);
+        doc.roundedRect(10, 35, 80, 15, 3, 3);
+        doc.setFontSize(8);
+        doc.text("Transaction ID", 50, 34, { align: "center" });
+        doc.setFont("courier", "bold");
+        doc.text(rid, 50, 44, { align: "center" });
 
-            setTimeout(async () => {
-                const { data, error } = await _supabase
-                    .from('transactions')
-                    .select('phone_number, amount')
-                    .eq('checkout_request_id', receiptId)
-                    .single();
-
-                if (data) {
-                    document.getElementById('utel').value = data.phone_number;
-                    document.getElementById('uamount').value = data.amount;
-                    banner.innerHTML = "RECEIPT PAID";
-                    banner.style.backgroundColor = "var(--xeco-green)";
-
-                    new QRCode(document.getElementById("qrcode"), {
-                        text: window.location.href,
-                        width: 100, height: 100
-                    });
-                }
-            }, 5000); 
-        }
-
-        window.onload = loadTransactionData;
-
-        function createPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ unit: 'mm', format: [100, 150] });
-            
-            const rid = document.getElementById('rid').value;
-            const name = document.getElementById('fname').value || 'N/A';
-            const tel = document.getElementById('utel').value;
-            const amount = document.getElementById('uamount').value;
-
-            // 1. Header (RECEIPT PAID)
-            doc.setFillColor(0, 127, 63); 
-            doc.rect(0, 0, 100, 15, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("RECEIPT PAID", 50, 10, { align: "center" });
-
-            // 2. Logo & Date
-            doc.setTextColor(0);
-            doc.setFontSize(10);
-            doc.text("XECO DEVELOPERS", 50, 25, { align: "center" });
-            doc.setFont("courier", "normal");
-            doc.setFontSize(8);
-            doc.text(new Date().toLocaleString(), 50, 30, { align: "center" });
-
-            // 3. Token Box (Like image_5db0a6.png)
-            doc.setLineDashPattern([2, 1], 0);
-            doc.roundedRect(10, 35, 80, 15, 3, 3);
-            doc.text("Transaction ID", 50, 34, { align: "center" });
-            doc.setFont("courier", "bold");
-            doc.setFontSize(10);
-            doc.text(rid, 50, 44, { align: "center" });
-
-            // 4. Details with dashed lines
-            doc.setFont("courier", "normal");
-            doc.setFontSize(9);
-            doc.setLineDashPattern([1, 1], 0);
-            doc.line(10, 55, 90, 55);
-
-            doc.text("Customer Name", 10, 62);
-            doc.text(name.substring(0, 20), 90, 62, { align: "right" });
-
-            doc.text("Phone Number", 10, 69);
-            doc.text(tel, 90, 69, { align: "right" });
-
-            doc.line(10, 75, 90, 75);
-
-            // 5. Totals
-            doc.text("Amount", 10, 82);
-            doc.text(amount + " KES", 90, 82, { align: "right" });
-            doc.text("Tax", 10, 89);
-            doc.text("0.00 KES", 90, 89, { align: "right" });
-
-            doc.setFont("courier", "bold");
-            doc.text("Total", 10, 96);
-            doc.text(amount + " KES", 90, 96, { align: "right" });
-
-            doc.line(10, 102, 90, 102);
-
-            // 6. Footer QR
-            const qrCanvas = document.querySelector('#qrcode canvas');
-            if(qrCanvas) {
-                const qrData = qrCanvas.toDataURL("image/png");
-                doc.addImage(qrData, 'PNG', 40, 110, 20, 20);
-                doc.setFontSize(7);
-                doc.text("VERIFIED BY XECO PAY", 50, 135, { align: "center" });
-            }
-
-            return doc;
-        }
-
-        function handleReceipt() {
-            if(!document.getElementById('utel').value || document.getElementById('utel').value === "...") {
-                return alert("Please wait for processing to finish.");
-            }
-            const doc = createPDF();
-            doc.save(`Xeco_Receipt.pdf`);
-        }
-
-        function shareReceipt() {
-            if (navigator.share) {
-                navigator.share({ title: 'Xeco Receipt', url: window.location.href });
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied!");
-            }
-        }
-    </script>
+        doc.setFont("courier", "normal");
+        doc.setLineDashPattern([1, 1], 0);
+        doc.line(10, 55, 90, 55);
+        doc.text("Name: " + name.toUpperCase(), 10, 62);
+        doc.text("Phone: " + tel, 10, 69);
+        doc.line(10, 75, 90, 75);
+        doc.text("TOTAL: " + amount, 10, 85);
+        
+        doc.save(`Xeco_Receipt.pdf`);
+    }
+</script>
 </body>
 </html>
