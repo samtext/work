@@ -4,6 +4,7 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
+import basicAuth from 'express-basic-auth'; // NEW: Security import
 import router from './controllers/lipaNaMpesa.js'
 import {callback} from './controllers/lipaCallback.js';
 import adminRoutes from './routes/admin.js';
@@ -30,11 +31,11 @@ app.get("/", async(req, res) => {
   res.render('payment', {failedMessage: null, successMessage: null});
 });
 
+// The redirect will now trigger the Basic Auth below
 app.get("/dashboard", async(req, res) => {
   res.redirect('/admin/dashboard');
 });
 
-// NEW RECEIPT ROUTE
 app.get("/receipt", (req, res) => {
     res.render('receipt_form', { 
         checkoutId: req.query.checkoutId || "",
@@ -45,7 +46,13 @@ app.get("/receipt", (req, res) => {
     });
 });
 
-app.use('/admin', (req, res, next) => {
+// --- SECURED ADMIN ROUTE ---
+// This middleware intercepts any request starting with /admin
+app.use('/admin', basicAuth({
+    users: { 'admin': 'auri2025' }, // Set your username and password here
+    challenge: true,               // Forces browser to show login popup
+    realm: 'AuriAdminControl',
+}), (req, res, next) => {
     res.locals.env = {
         SUPABASE_URL: process.env.SUPABASE_URL,
         SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY
