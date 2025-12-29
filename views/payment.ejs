@@ -21,12 +21,30 @@
                     <div class="payment-card shadow-lg border-0 rounded-4 overflow-hidden bg-white">
                         <div class="card-header bg-white border-0 pt-4 pb-0 px-4 text-center">
                             <img src="/static/images/mpesa.png" alt="M-Pesa" class="mpesa-logo-main mb-3">
-                            <h2 class="h4 fw-bold mb-1">M-Pesa STK Push</h2>
+                            <h2 class="h4 fw-bold mb-1">Xeco Developers Services</h2>
                             <p class="text-muted small">Enter your details to initiate payment</p>
                         </div>
 
                         <div class="card-body p-4">
                             <form id="form" method="post" action="/lipaNaMpesa">
+                                <div class="mb-4">
+                                    <label for="serviceName"
+                                        class="form-label small fw-bold text-muted text-uppercase">Service Name</label>
+                                    <div class="input-group input-group-lg custom-input-group">
+                                        <span class="input-group-text bg-light border-end-0 text-muted">
+                                            <i class="bi bi-briefcase-fill"></i>
+                                        </span>
+                                        <select class="form-select bg-light border-start-0 ps-0 fw-bold"
+                                            id="serviceName" name="serviceName" required>
+                                            <option value="" disabled selected>Select a service</option>
+                                            <option value="Graphic Design">Graphic Design</option>
+                                            <option value="Web Design">Web Design</option>
+                                            <option value="Payment Systems">Payment Systems</option>
+                                            <option value="Database Design">Database Design</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div class="mb-4">
                                     <label for="amount"
                                         class="form-label small fw-bold text-muted text-uppercase">Amount (Ksh)</label>

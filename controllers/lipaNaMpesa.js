@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import { getTimeStamp } from '../utils/timestamp.utils.js';
 import { authToken } from '../middlewares/authorization.js';
+import { supabase } from '../config/supabaseClient.js'; // Added database import
 
 dotenv.config();
 const router = express.Router();
@@ -62,6 +63,14 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
     if (stkResponse.ResponseCode === '0') {
       const requestID = stkResponse.CheckoutRequestID;
 
+      // DATABASE: Save the initial pending transaction
+      await supabase.from('transactions').insert([{
+        checkout_request_id: requestID,
+        phone_number: phoneNumber,
+        amount: amount,
+        status: 'pending'
+      }]);
+
       const queryPayload = {
         "BusinessShortCode": process.env.BusinessShortCode,
         "Password": password,
@@ -86,6 +95,9 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
 
           // Handle different result codes
           if (resultCode === '0') {
+            // DATABASE: Update to success
+            await supabase.from('transactions').update({ status: 'success', result_desc: resultDesc }).eq('checkout_request_id', requestID);
+            
             // Payment successful
             res.render('success', {
               type: "Successful",
@@ -94,6 +106,9 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
             });
             clearInterval(timer); // Stop querying once payment is successful
           } else if (resultCode === '1032') {
+            // DATABASE: Update to cancelled
+            await supabase.from('transactions').update({ status: 'cancelled', result_desc: resultDesc }).eq('checkout_request_id', requestID);
+
             // User cancelled the payment
             res.render('failed', {
               type: "cancelled",
@@ -102,6 +117,9 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
             });
             clearInterval(timer);
           } else if (resultCode === '1') {
+            // DATABASE: Update to failed
+            await supabase.from('transactions').update({ status: 'failed', result_desc: resultDesc }).eq('checkout_request_id', requestID);
+
             // Insufficient balance
             res.render('failed', {
               type: "failed",
@@ -110,6 +128,9 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
             });
             clearInterval(timer);
           } else if (resultCode === '2029') {
+            // DATABASE: Update to failed
+            await supabase.from('transactions').update({ status: 'failed', result_desc: resultDesc }).eq('checkout_request_id', requestID);
+
             // Failed due to an unresolved reason type
             res.render('failed', {
               type: "failed",
@@ -118,6 +139,9 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
             });
             clearInterval(timer);
           } else {
+            // DATABASE: Update for any other failure codes
+            await supabase.from('transactions').update({ status: 'failed', result_desc: resultDesc }).eq('checkout_request_id', requestID);
+
             // Other failure codes
             res.render('failed', {
               type: "failed",
