@@ -1,88 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful | Secure Checkout</title>
-    <link rel="stylesheet" href="/static/styles/styles.css" />
+    <title>Payment Successful | Auri Online Services</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Rubik', sans-serif; background-color: #f8f9fa; }
+        .payment-card { max-width: 450px; width: 100%; border-radius: 20px !important; }
+        .btn-auri { background-color: #007f3f; border: none; transition: transform 0.2s; color: white; }
+        .btn-auri:hover { background-color: #006632; transform: translateY(-2px); color: white; }
+        .smallest { font-size: 0.75rem; letter-spacing: 0.5px; }
+        .transaction-box { border: 1.5px dashed #007f3f; background-color: #f1f8f4; border-radius: 12px; }
+        .tracking-widest { letter-spacing: 2px; }
+    </style>
 </head>
 
 <body class="bg-light">
-    <section class="payment-section d-flex align-items-center justify-content-center min-vh-100">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-12 col-md-8 col-lg-5">
-                    <div id="successful"
-                        class="payment-card shadow-lg border-0 rounded-4 overflow-hidden bg-white text-center p-5">
-                        <div class="status-header mb-4">
-                            <h1 class="h3 fw-bold text-success mb-2">Payment <span id="type">
-                                    <%= type %>
-                                </span></h1>
-                            <h2 class="h6 text-muted fw-bold text-uppercase tracking-widest" id="heading">Payment for
-                                <%= heading %>
-                            </h2>
-                        </div>
-
-                        <div class="status-visual mb-4">
-                            <img src="/static/images/successful.gif" alt="Success" class="img-fluid rounded"
-                                style="max-height: 120px;">
-                        </div>
-
-                        <div class="status-details mb-4">
-                            <div class="p-3 bg-light rounded-3 text-start">
-                                <ul class="list-unstyled mb-0 px-2">
-                                    <li class="d-flex justify-content-between mb-2 pb-2 border-bottom border-white">
-                                        <span class="small text-muted">Account Name:</span>
-                                        <span class="small fw-bold">Karimakos</span>
-                                    </li>
-                                    <li class="d-flex justify-content-between mb-2 pb-2 border-bottom border-white">
-                                        <span class="small text-muted">Duration:</span>
-                                        <span class="small fw-bold">90 Days</span>
-                                    </li>
-                                    <li class="d-flex justify-content-between">
-                                        <span class="small text-muted">Expiry Date:</span>
-                                        <span class="small fw-bold">31 June 2025</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="redirection-countdown mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="smallest text-muted">Auto-redirection</span>
-                                <span class="smallest fw-bold text-success"><span id="count">10</span>s</span>
-                            </div>
-                            <div class="progress" style="height: 6px; border-radius: 10px; background-color: #e8f5e9;">
-                                <div id="progress-bar" class="progress-bar bg-success" role="progressbar"
-                                    style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-
-                        <div class="action-area">
-                            <a href="/dashboard"
-                                class="btn btn-mpesa w-100 py-3 fw-bold rounded-3 shadow-sm transition-all text-white text-decoration-none d-block">
-                                <i class="bi bi-shield-lock-fill me-2"></i> ACCESS YOUR ACCOUNT
-                            </a>
-                        </div>
-
-                        <div class="footer-note mt-4 pt-3 border-top border-light">
-                            <span class="smallest text-muted text-uppercase tracking-wider opacity-75">Secure Payment
-                                Gateway</span>
-                        </div>
-                    </div>
+    <section class="payment-section d-flex align-items-center justify-content-center min-vh-100 p-3">
+        <div class="payment-card shadow-lg border-0 bg-white text-center p-5">
+            
+            <div class="status-header mb-4">
+                <div class="mb-3">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
                 </div>
+                <h1 class="h3 fw-bold text-dark mb-1">Payment Successful</h1>
+                <h2 class="h6 text-muted fw-bold text-uppercase tracking-widest">
+                    <%= heading %>
+                </h2>
+            </div>
+
+            <div class="status-details mb-4">
+                <div class="p-3 transaction-box text-start">
+                    <ul class="list-unstyled mb-0 px-1">
+                        <li class="d-flex justify-content-between mb-2">
+                            <span class="small text-muted">Service:</span>
+                            <span class="small fw-bold text-uppercase"><%= type %></span>
+                        </li>
+                        <li class="d-flex justify-content-between">
+                            <span class="small text-muted">Ref ID:</span>
+                            <span class="small fw-bold text-truncate ms-3"><%= checkoutId %></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="redirection-countdown mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="smallest text-muted">Redirecting to Receipt</span>
+                    <span class="smallest fw-bold text-success"><span id="count">10</span>s</span>
+                </div>
+                <div class="progress" style="height: 6px; border-radius: 10px; background-color: #e8f5e9;">
+                    <div id="progress-bar" class="progress-bar bg-success" role="progressbar"
+                        style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <a href="/receipt?checkoutId=<%= checkoutId %>" class="btn btn-auri w-100 py-3 fw-bold rounded-3 text-decoration-none">
+                    <i class="bi bi-file-earmark-text-fill me-2"></i> GENERATE RECEIPT NOW
+                </a>
+            </div>
+
+            <div class="footer-note mt-4 pt-3 border-top border-light">
+                <span class="smallest text-muted text-uppercase tracking-wider opacity-75">
+                    Verified by Auri Online Services
+                </span>
             </div>
         </div>
     </section>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/index.js"></script>
+    <script>
+        let count = 10;
+        const progress = document.getElementById('progress-bar');
+        const countText = document.getElementById('count');
+        const checkoutId = "<%= checkoutId %>";
+        
+        const timer = setInterval(() => {
+            count--;
+            countText.innerText = count;
+            progress.style.width = (count * 10) + "%";
+            
+            if (count <= 0) {
+                clearInterval(timer);
+                // REDIRECTS TO RECEIPT INSTEAD OF DASHBOARD
+                window.location.href = "/receipt?checkoutId=" + checkoutId;
+            }
+        }, 1000);
+    </script>
 </body>
-
 </html>

@@ -12,7 +12,7 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
   try {
     const number = req.body.phoneNumber.replace(/[^0-9]/g, '').replace(/^0/, ''); 
     const phoneNumber = `254${number}`;
-    const amount = Math.floor(req.body.amount); // Ensure amount is an integer
+    const amount = Math.floor(req.body.amount); 
     const timestamp = getTimeStamp();
     const access_token = req.authData;
 
@@ -65,18 +65,45 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
             headers: { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
           });
 
-          const resultCode = status.data.ResultCode;
+          const resultCode = String(status.data.ResultCode);
+          const resultDesc = status.data.ResultDesc;
+
           if (resultCode === '0') {
+            clearInterval(timer);
             await supabase.from('transactions').update({ status: 'success' }).eq('checkout_request_id', requestID);
+            
+            // Render the success page for redirecting to receipt
+            return res.render('success', { 
+              checkoutId: requestID, 
+              type: "Unlimited Internet", 
+              heading: "Auri Online Services" 
+            });
+
+          } else if (resultCode === '1032') { 
+            // Handles user cancellation specifically
             clearInterval(timer);
-            // REDIRECT TO RECEIPT
-            return res.redirect(`/receipt?checkoutId=${requestID}`);
-          } else if (resultCode) {
+            await supabase.from('transactions').update({ status: 'cancelled' }).eq('checkout_request_id', requestID);
+            
+            return res.render('failed', { 
+              type: "failed", 
+              heading: "Request Cancelled", 
+              desc: "Request Cancelled by user." 
+            });
+
+          } else if (resultCode) { 
+            // Handles any other failure
+            clearInterval(timer);
             await supabase.from('transactions').update({ status: 'failed' }).eq('checkout_request_id', requestID);
-            clearInterval(timer);
-            res.render('failed', { type: "failed", heading: "Payment Failed", desc: status.data.ResultDesc });
+            
+            return res.render('failed', { 
+              type: "failed", 
+              heading: "Payment Failed", 
+              desc: resultDesc 
+            });
           }
-        } catch (error) { /* Polling */ }
+        } catch (error) { 
+          // Polling continues if the transaction is still in progress
+        }
       }, 15000);
     }
   } catch (error) {
