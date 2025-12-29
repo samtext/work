@@ -47,7 +47,7 @@ const sendAlert = (offendingIp) => {
                 <p><strong>Blocked IP:</strong> ${offendingIp}</p>
                 <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
                 <p style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
-                    <strong>Status:</strong> The request was automatically rejected by your IP Whitelist.
+                    <strong>Status:</strong> Rejected by IP Range Whitelist.
                 </p>
             </div>
         `
@@ -59,20 +59,29 @@ const sendAlert = (offendingIp) => {
     });
 };
 
-// --- SECURITY: IP WHITELIST ---
+// --- SECURITY: IP RANGE WHITELIST ---
 const ipWhitelist = (req, res, next) => {
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const allowedIp = process.env.ALLOWED_IP || '197.232.6.149';
+    // 1. Get the real client IP (first one in the list)
+    const forwarded = req.headers['x-forwarded-for'];
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
+    
+    // 2. Define your Range (First two parts of your IP)
+    const allowedRange = '197.232.'; 
 
-    if (clientIp.includes(allowedIp) || clientIp.includes('127.0.0.1') || clientIp === '::1') {
+    // 3. Validation
+    const isLocal = clientIp.includes('127.0.0.1') || clientIp === '::1';
+    const isMyWiFi = clientIp.startsWith(allowedRange);
+
+    if (isLocal || isMyWiFi) {
+        console.log(`[AUTH] Access granted to: ${clientIp}`);
         next();
     } else {
         console.log(`[SECURITY] Blocked access from: ${clientIp}`);
-        sendAlert(clientIp); // Triggers the Auri Pay email alert
+        sendAlert(clientIp);
         res.status(403).send(`
             <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
-                <h1 style="color:red;">403 Forbidden</h1>
-                <h1>Page Not Found</h1>
+                <h1 style="color:#333;">404 Not Found</h1>
+                <p>The requested URL was not found on this server.</p>
             </div>
         `);
     }
