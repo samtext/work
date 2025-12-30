@@ -20,6 +20,8 @@ const __dirname = dirname(__filename);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.json());
+
+// Serving static files from the public folder
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
 app.set('view engine', 'ejs');
@@ -61,15 +63,21 @@ const sendAlert = (offendingIp) => {
 
 // --- SECURITY: IP WHITELIST ---
 const ipWhitelist = (req, res, next) => {
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const allowedIp = process.env.ALLOWED_IP || '197.232.6.149';
+    // Handling proxy IP lists (common in production)
+    const forwarded = req.headers['x-forwarded-for'];
+    const clientIp = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
+    
+    // Check for the partial range '197.232.' to avoid lockouts on your network
+    const allowedRange = '197.232.'; 
+    const isLocal = clientIp.includes('127.0.0.1') || clientIp === '::1';
+    const isMyWiFi = clientIp.startsWith(allowedRange);
 
-    if (clientIp.includes(allowedIp) || clientIp.includes('127.0.0.1') || clientIp === '::1') {
+    if (isLocal || isMyWiFi) {
         next();
     } else {
         console.log(`[SECURITY] Blocked access from: ${clientIp}`);
-        sendAlert(clientIp); // Triggers the Auri Pay email alert
-        res.status(403).send(`
+        sendAlert(clientIp);
+        res.status(404).send(`
             <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
                 <h1>Page Not Found</h1>
             </div>
@@ -78,13 +86,22 @@ const ipWhitelist = (req, res, next) => {
 };
 
 // --- ROUTES ---
+
+// 1. M-Pesa Controllers
 app.use(router);
 app.use(callback);
 
+// 2. MAIN LANDING PAGE (New Fiverr-style home)
 app.get("/", (req, res) => {
+  res.render('index'); 
+});
+
+// 3. SERVICE PAYMENT PAGE (Your existing M-Pesa project)
+app.get("/service-payment", (req, res) => {
   res.render('payment', { failedMessage: null, successMessage: null });
 });
 
+// 4. RECEIPT PAGE
 app.get("/receipt", (req, res) => {
     res.render('receipt_form', { 
         checkoutId: req.query.checkoutId || "",
@@ -95,6 +112,7 @@ app.get("/receipt", (req, res) => {
     });
 });
 
+// 5. DASHBOARD REDIRECT
 app.get("/dashboard", (req, res) => {
   res.redirect('/admin/dashboard');
 });
@@ -113,5 +131,5 @@ app.use('/admin', ipWhitelist, basicAuth({
 }, adminRoutes);
 
 app.listen(port, () => {
-  console.log(`Auri Pay Server running on port ${port}`);
+    console.log(`Auri Pay Server running on port ${port}`);
 });
