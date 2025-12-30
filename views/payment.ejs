@@ -11,6 +11,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* CRITICAL: STYLES FOR THE OVERLAY */
+        #processing {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .processing-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 2rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-mpesa {
+            background-color: #1dbf73;
+            color: white;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-mpesa:hover {
+            background-color: #19a463;
+        }
+
+        .mpesa-logo-main {
+            max-width: 130px;
+        }
+
+        .smallest { font-size: 11px; }
+    </style>
 </head>
 
 <body class="bg-light">
@@ -20,7 +62,7 @@
                 <div class="col-12 col-md-6 col-lg-5">
                     <div class="payment-card shadow-lg border-0 rounded-4 overflow-hidden bg-white">
                         <div class="card-header bg-white border-0 pt-4 pb-0 px-4 text-center">
-                            <img src="/static/images/mpesa.png" alt="M-Pesa" class="mpesa-logo-main mb-3">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/1200px-M-PESA_LOGO-01.svg.png" alt="M-Pesa" class="mpesa-logo-main mb-3">
                             <h2 class="h4 fw-bold mb-1">Xeco Developers Services</h2>
                             <p class="text-muted small">Enter your details to initiate payment</p>
                         </div>
@@ -28,14 +70,12 @@
                         <div class="card-body p-4">
                             <form id="form" method="post" action="/lipaNaMpesa">
                                 <div class="mb-4">
-                                    <label for="serviceName"
-                                        class="form-label small fw-bold text-muted text-uppercase">Service Name</label>
-                                    <div class="input-group input-group-lg custom-input-group">
+                                    <label for="serviceName" class="form-label small fw-bold text-muted text-uppercase">Service Name</label>
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light border-end-0 text-muted">
                                             <i class="bi bi-briefcase-fill"></i>
                                         </span>
-                                        <select class="form-select bg-light border-start-0 ps-0 fw-bold"
-                                            id="serviceName" name="serviceName" required>
+                                        <select class="form-select bg-light border-start-0 ps-0 fw-bold" id="serviceName" name="serviceName" required>
                                             <option value="" disabled selected>Select a service</option>
                                             <option value="Graphic Design">Graphic Design</option>
                                             <option value="Web Design">Web Design</option>
@@ -46,34 +86,22 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="amount"
-                                        class="form-label small fw-bold text-muted text-uppercase">Amount (Ksh)</label>
-                                    <div class="input-group input-group-lg custom-input-group">
-                                        <span
-                                            class="input-group-text bg-light border-end-0 text-muted fw-bold">Ksh</span>
-                                        <input type="number" class="form-control bg-light border-start-0 ps-0 fw-bold"
-                                            id="amount" name="amount" placeholder="e.g. 100" min="1" required>
+                                    <label for="amount" class="form-label small fw-bold text-muted text-uppercase">Amount (Ksh)</label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light border-end-0 text-muted fw-bold">Ksh</span>
+                                        <input type="number" class="form-control bg-light border-start-0 ps-0 fw-bold" id="amount" name="amount" placeholder="e.g. 100" min="1" required>
                                     </div>
-                                    <div class="form-text smallest text-end mt-1">Safe & Secure Payment</div>
                                 </div>
 
                                 <div class="mb-4">
-                                    <label for="phoneNumber"
-                                        class="form-label small fw-bold text-muted text-uppercase">Phone Number</label>
-                                    <div class="input-group input-group-lg custom-input-group">
-                                        <span class="input-group-text bg-light border-end-0 text-muted"><i
-                                                class="bi bi-phone-fill"></i></span>
-                                        <input type="tel" class="form-control bg-light border-start-0 ps-0 fw-bold"
-                                            id="phoneNumber" name="phoneNumber" placeholder="07XXXXXXXX"
-                                            pattern="[0-9]{10}" required>
-                                    </div>
-                                    <div class="form-text smallest text-end mt-1">Enter number registered with M-Pesa
+                                    <label for="phoneNumber" class="form-label small fw-bold text-muted text-uppercase">Phone Number</label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-phone-fill"></i></span>
+                                        <input type="tel" class="form-control bg-light border-start-0 ps-0 fw-bold" id="phoneNumber" name="phoneNumber" placeholder="07XXXXXXXX" pattern="[0-9]{10}" required>
                                     </div>
                                 </div>
 
-                                <button type="submit"
-                                    class="btn btn-mpesa w-100 py-3 fw-bold rounded-3 shadow-sm transition-all"
-                                    id="submit-btn">
+                                <button type="submit" class="btn btn-mpesa w-100 py-3 fw-bold rounded-3 shadow-sm" id="submit-btn">
                                     <i class="bi bi-lock-fill me-2"></i> PAY NOW
                                 </button>
                             </form>
@@ -82,8 +110,7 @@
                         <div class="card-footer bg-white border-0 py-3 px-4 text-center">
                             <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
                                 <i class="bi bi-shield-check text-success"></i>
-                                <span class="smallest text-muted text-uppercase tracking-wider">Powered By
-                                    Xeco Developers</span>
+                                <span class="smallest text-muted text-uppercase">Powered By Xeco Developers</span>
                             </div>
                         </div>
                     </div>
@@ -92,12 +119,10 @@
         </div>
     </section>
 
-    <!-- Processing Overlay -->
-    <section id="processing" class="processing-overlay shadow-none">
-        <div class="processing-content text-center shadow-lg">
-            <div class="modern-loader mb-4">
-                <div class="spinner-border text-success" style="width: 4rem; height: 4rem; border-width: 0.25em;"
-                    role="status">
+    <section id="processing">
+        <div class="processing-content text-center">
+            <div class="mb-4">
+                <div class="spinner-border text-success" style="width: 4rem; height: 4rem; border-width: 0.25em;" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
@@ -105,21 +130,33 @@
             <p class="text-muted mb-4 px-4">Please check your phone for the <strong>M-Pesa Pin Prompt</strong></p>
 
             <div class="timeout-badge bg-light rounded-pill py-2 px-4 mb-4 d-inline-block border">
-                <span class="text-muted small">Expires in <span id="pay-count"
-                        class="fw-bold text-success">60</span>s</span>
+                <span class="text-muted small">Expires in <span id="pay-count" class="fw-bold text-success">60</span>s</span>
             </div>
 
             <div class="d-block">
-                <a href="/cancel" class="text-danger small text-decoration-none fw-bold">
+                <a href="javascript:location.reload()" class="text-danger small text-decoration-none fw-bold">
                     <i class="bi bi-x-circle me-1"></i> Cancel Request
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/js/index.js"></script>
+    <script>
+        document.getElementById('form').addEventListener('submit', function() {
+            // Show the overlay
+            document.getElementById('processing').style.display = 'flex';
+
+            // Start 60s countdown
+            let timeLeft = 60;
+            const timerDisplay = document.getElementById('pay-count');
+            
+            const countdown = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) clearInterval(countdown);
+            }, 1000);
+        });
+    </script>
 </body>
 
 </html>
