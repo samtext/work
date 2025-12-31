@@ -12,7 +12,15 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
   try {
     const number = req.body.phoneNumber.replace(/[^0-9]/g, '').replace(/^0/, ''); 
     const phoneNumber = `254${number}`;
-    const amount = Math.floor(req.body.amount); 
+    
+    // --- PLATFORM FEE LOGIC ---
+    // Capture serviceName from body or default to "Unlimited Internet"
+    const serviceName = req.body.serviceName || "Unlimited Internet";
+    const baseAmount = Math.floor(req.body.amount); 
+    const platformFee = 5;
+    // The totalAmount is what will appear on the user's M-Pesa prompt
+    const totalAmount = baseAmount + platformFee; 
+
     const timestamp = getTimeStamp();
     const access_token = req.authData;
 
@@ -26,13 +34,13 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
       "Password": password,
       "Timestamp": timestamp,
       "TransactionType": "CustomerBuyGoodsOnline",
-      "Amount": amount, 
+      "Amount": totalAmount, // Includes the 5 KES fee
       "PartyA": phoneNumber,
       "PartyB": "4938110",
       "PhoneNumber": phoneNumber,
       "CallBackURL": callbackURL,
       "AccountReference": "CMT1234RT",
-      "TransactionDesc": "Unlimited Internet"
+      "TransactionDesc": serviceName 
     };
 
     const response = await axios.post(stkUrl, body, {
@@ -44,10 +52,13 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
     if (stkResponse.ResponseCode === '0') {
       const requestID = stkResponse.CheckoutRequestID;
 
+      // Inserting into database with the new columns
       await supabase.from('transactions').insert([{
         checkout_request_id: requestID,
         phone_number: phoneNumber,
-        amount: amount,
+        amount: totalAmount,
+        service_name: serviceName,
+        platform_fee: platformFee,
         status: 'pending'
       }]);
 
@@ -72,15 +83,14 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
             clearInterval(timer);
             await supabase.from('transactions').update({ status: 'success' }).eq('checkout_request_id', requestID);
             
-            // Render the success page for redirecting to receipt
             return res.render('success', { 
               checkoutId: requestID, 
-              type: "Unlimited Internet", 
-              heading: "Auri Online Services" 
+              type: serviceName, 
+              heading: "Auri Online Services",
+              amount: totalAmount
             });
 
           } else if (resultCode === '1032') { 
-            // Handles user cancellation specifically
             clearInterval(timer);
             await supabase.from('transactions').update({ status: 'cancelled' }).eq('checkout_request_id', requestID);
             
@@ -91,7 +101,6 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
             });
 
           } else if (resultCode) { 
-            // Handles any other failure
             clearInterval(timer);
             await supabase.from('transactions').update({ status: 'failed' }).eq('checkout_request_id', requestID);
             
@@ -102,7 +111,7 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
             });
           }
         } catch (error) { 
-          // Polling continues if the transaction is still in progress
+          // Polling continues
         }
       }, 15000);
     }

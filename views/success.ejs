@@ -41,6 +41,10 @@
                             <span class="small text-muted">Service:</span>
                             <span class="small fw-bold text-uppercase"><%= type %></span>
                         </li>
+                        <li class="d-flex justify-content-between mb-2">
+                            <span class="small text-muted">Amount Paid:</span>
+                            <span class="small fw-bold text-success"><%= amount %> KES</span>
+                        </li>
                         <li class="d-flex justify-content-between">
                             <span class="small text-muted">Ref ID:</span>
                             <span class="small fw-bold text-truncate ms-3"><%= checkoutId %></span>
@@ -88,7 +92,6 @@
             
             if (count <= 0) {
                 clearInterval(timer);
-                // REDIRECTS TO RECEIPT INSTEAD OF DASHBOARD
                 window.location.href = "/receipt?checkoutId=" + checkoutId;
             }
         }, 1000);
