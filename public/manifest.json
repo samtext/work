@@ -1,20 +1,23 @@
 {
-  "name": "My Awesome App",
-  "short_name": "MyApp",
+  "name": "Servio | Online Services",
+  "short_name": "Servio",
+  "description": "Professional freelance services at your fingertips.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#1dbf73",
+  "theme_color": "#1dbf73",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/static/images/logo.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/static/images/logo.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

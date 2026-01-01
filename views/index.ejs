@@ -7,7 +7,9 @@
     
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1dbf73">
-    <link rel="apple-touch-icon" href="/images/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/static/images/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/icons/icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/icons/icon-16.png">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -29,8 +31,9 @@
             position: relative;
             z-index: 1100;
         }
-        .navbar-brand { color: #000 !important; font-weight: 800; font-size: 1.8rem; letter-spacing: -1px; text-decoration: none; }
+        .navbar-brand { color: #000 !important; font-weight: 800; font-size: 1.8rem; letter-spacing: -1px; text-decoration: none; display: flex; align-items: center; }
         .navbar-brand span { color: var(--fiverr-green); }
+        .navbar-brand img { height: 40px; margin-right: 10px; } /* Style for the new logo */
 
         .search-bar-header {
             flex-grow: 1;
@@ -158,7 +161,9 @@
 
     <header class="main-header" id="topHeader">
         <div class="container d-flex align-items-center">
-            <a class="navbar-brand" href="#">Ser<span>vio</span></a>
+            <a class="navbar-brand" href="#">
+                Ser<span>vio</span>
+            </a>
             <div class="search-bar-header d-flex">
                 <input type="text" id="headerSearch" placeholder="What service are you looking for today?">
                 <button class="btn-search"><i class="bi bi-search"></i></button>
@@ -311,7 +316,9 @@
             </div>
             <div class="footer-bottom d-flex flex-column flex-md-row align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
-                    <a href="#" class="navbar-brand me-3" style="font-size: 1.4rem;">Ser<span>vio</span>.</a>
+                    <a href="#" class="navbar-brand me-3" style="font-size: 1.4rem;">
+                         <img src="/static/images/logo.png" style="height: 30px;"> Ser<span>vio</span>.
+                    </a>
                     <span class="text-muted small">© Servio International Ltd. 2026</span>
                 </div>
                 <div class="social-links mt-3 mt-md-0">
