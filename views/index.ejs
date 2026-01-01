@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Servio | Online Services </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -92,7 +92,7 @@
         }
         .pill-btn:hover { background: white; color: black; }
 
-        /* --- POPULAR SERVICES (UPDATED FOR FULL FIT) --- */
+        /* --- POPULAR SERVICES --- */
         .popular-row {
             display: flex;
             flex-wrap: nowrap;
@@ -103,7 +103,7 @@
         
         .popular-item {
             flex: 0 0 auto;
-            width: 20%; /* Desktop default: 5 cards fit perfectly */
+            width: 20%; 
             padding: 0 8px;
         }
 
@@ -147,23 +147,6 @@
         .footer-bottom { border-top: 1px solid var(--border-light); padding: 25px 0; margin-top: 40px; }
         .social-links a { color: #74767e; font-size: 1.2rem; margin-left: 20px; }
 
-        /* --- MOBILE --- */
-        @media (max-width: 1024px) {
-            .hero-h1 { font-size: 2.2rem; }
-            .search-bar-header, .sticky-scroll-nav { display: none !important; }
-            .mobile-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border-light); z-index: 2000; }
-            .nav-item-mobile { text-align: center; color: #74767e; text-decoration: none; font-size: 11px; position: relative; }
-            .nav-item-mobile i { font-size: 22px; display: block; }
-            .nav-item-mobile.active { color: var(--fiverr-green); }
-            .cart-badge { position: absolute; top: -2px; right: 2px; background: var(--fiverr-green); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
-            
-            /* Fit 2 cards on tablet, 1.2 cards on phone for hint of scroll */
-            .popular-item { width: 50%; }
-        }
-        @media (max-width: 576px) {
-            .popular-item { width: 85%; } /* Let one card almost fill the screen on small phones */
-        }
-        @media (min-width: 1025px) { .mobile-bottom-nav { display: none !important; } }
     </style>
 </head>
 <body>
@@ -171,11 +154,11 @@
     <header class="main-header" id="topHeader">
         <div class="container d-flex align-items-center">
             <a class="navbar-brand" href="#">Ser<span>vio</span></a>
-            <div class="search-bar-header d-none d-lg-flex">
+            <div class="search-bar-header d-flex">
                 <input type="text" id="headerSearch" placeholder="What service are you looking for today?">
                 <button class="btn-search"><i class="bi bi-search"></i></button>
             </div>
-            <div class="ms-auto d-none d-lg-flex align-items-center">
+            <div class="ms-auto d-flex align-items-center">
                 <a href="/service-payment" class="nav-link px-3 fw-bold text-muted small">Xeco Pay</a>
                 <a href="/" class="nav-link px-3 fw-bold text-muted small">Servio Pro</a>
                 <a href="#" class="nav-link px-3 fw-bold text-muted small">Order Service</a>
@@ -336,13 +319,6 @@
         </div>
     </footer>
 
-    <nav class="mobile-bottom-nav">
-        <a href="#" class="nav-item-mobile active"><i class="bi bi-house-door-fill"></i>Home</a>
-        <a href="#" class="nav-item-mobile"><i class="bi bi-search"></i>Search</a>
-        <a href="#" class="nav-item-mobile"><i class="bi bi-cart"><span class="cart-badge" id="cartCount">1</span></i>Cart</a>
-        <a href="#" class="nav-item-mobile"><i class="bi bi-person"></i>Profile</a>
-    </nav>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const products = [
@@ -373,7 +349,6 @@
             document.getElementById('heroSearchInput').focus();
         }
 
-        // New Modal Function for Popular Services
         function viewPopularPrice(serviceName, price) {
             document.getElementById('qvContent').innerHTML = `
                 <div class="modal-header border-0 pb-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
@@ -407,7 +382,7 @@
         }
 
         let cartTotal = 1;
-        function addToCart() { cartTotal++; document.getElementById('cartCount').innerText = cartTotal; alert('Service added to cart!'); }
+        function addToCart() { cartTotal++; alert('Service added to cart!'); }
 
         function openQV(id) {
             const p = products.find(x => x.id === id);
