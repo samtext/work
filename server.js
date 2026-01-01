@@ -20,7 +20,18 @@ const __dirname = dirname(__filename);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.json());
+
+// --- KEEP YOUR ORIGINAL STATIC ROUTE ---
 app.use('/static', express.static(path.join(__dirname, 'public')));
+
+// --- ADDITION FOR PWA: SERVE MANIFEST AND SW FROM ROOT ---
+// This ensures the browser can find /manifest.json and /sw.js directly
+app.get('/manifest.json', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+});
+app.get('/sw.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'sw.js'));
+});
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
