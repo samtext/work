@@ -468,6 +468,28 @@
             color: var(--danger);
         }
 
+        .status-badge.reversed {
+            background: rgba(108, 117, 125, 0.1);
+            color: var(--secondary);
+        }
+
+        /* Reversal Button */
+        .btn-reverse {
+            background: linear-gradient(135deg, var(--danger), #dc3545);
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reverse:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
         /* Analytics Section */
         .analytics-grid {
             display: grid;
@@ -855,6 +877,7 @@
                                 <th>Amount</th>
                                 <th>Status</th>
                                 <th>Request ID</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="today-table-body">
@@ -902,6 +925,7 @@
                                 <th>Amount</th>
                                 <th>Status</th>
                                 <th>Request ID</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="all-transactions-body">
@@ -1071,6 +1095,39 @@
             }
         }
 
+        // Reversal Function
+        async function initiateReversal(receipt, amount) {
+            const confirmed = confirm(`Are you sure you want to reverse ${amount} KES for transaction ${receipt}?`);
+            
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/admin/reversal/initiate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        transactionId: receipt,
+                        amount: amount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Reversal request sent! Status: " + data.ResponseDescription);
+                    // Reload to see updated status
+                    location.reload();
+                } else {
+                    alert("Error: " + (data.errorMessage || "Failed to initiate reversal"));
+                }
+            } catch (error) {
+                console.error("Reversal Error:", error);
+                alert("An error occurred while processing the reversal.");
+            }
+        }
+
         // Sidebar Toggle for Mobile
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('active');
@@ -1121,15 +1178,12 @@
         });
 
         // Parse EJS data passed from server
-        // We'll use the transactions data passed from the server
-        // Make sure your server passes transactions as JSON or an array
-
-        // Load transactions from the JSON script tag to avoid IDE diagnostic errors
         const rawTransactions = JSON.parse(document.getElementById('transactions-data').textContent);
 
         const allTransactions = rawTransactions.length > 0 ? rawTransactions.map(t => ({
             id: t.checkout_request_id,
-            phone: t.phone_number,
+            receipt: t.mpesa_receipt || t.checkout_request_id,
+            phone: t.phone_number || t.phone,
             amount: parseFloat(t.amount) || 0,
             status: t.status,
             date: new Date(t.created_at),
@@ -1137,6 +1191,7 @@
         })) : [
             {
                 id: 'ws_CO_123456789',
+                receipt: 'REC123456',
                 phone: '254712345678',
                 amount: 1000,
                 status: 'success',
@@ -1145,6 +1200,7 @@
             },
             {
                 id: 'ws_CO_987654321',
+                receipt: 'REC654321',
                 phone: '254723456789',
                 amount: 500,
                 status: 'failed',
@@ -1186,7 +1242,7 @@
             if (todayTransactions.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td colspan="5" class="text-center py-4">
+                    <td colspan="6" class="text-center py-4">
                         <i class="bi bi-inbox" style="font-size: 2rem; color: var(--secondary);"></i>
                         <p class="mt-2 text-muted">No transactions today</p>
                     </td>
@@ -1200,9 +1256,11 @@
                     const time = new Date(t.timestamp);
                     const statusClass = t.status === 'success' ? 'success' :
                         (t.status === 'pending' ? 'pending' :
-                            (t.status === 'failed' ? 'failed' : 'cancelled'));
+                            (t.status === 'failed' ? 'failed' : 
+                             t.status === 'reversed' ? 'reversed' : 'cancelled'));
                     const statusIcon = t.status === 'success' ? 'check-circle' :
-                        (t.status === 'pending' ? 'clock' : 'x-circle');
+                        (t.status === 'pending' ? 'clock' : 
+                         t.status === 'reversed' ? 'arrow-counterclockwise' : 'x-circle');
                     const statusText = t.status.charAt(0).toUpperCase() + t.status.slice(1);
 
                     row.innerHTML = `
@@ -1224,8 +1282,18 @@
                         </td>
                         <td>
                             <code class="small text-muted">
-                                ${t.id.substring(0, 8)}...
+                                ${t.receipt.substring(0, 8)}...
                             </code>
+                        </td>
+                        <td>
+                            ${t.status === 'success' ? 
+                                `<button class="btn-reverse" onclick="initiateReversal('${t.receipt}', ${t.amount})">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    Reverse
+                                </button>` : 
+                             t.status === 'reversed' ? 
+                                `<span class="text-muted small">Reversed</span>` : 
+                                ''}
                         </td>
                     `;
                     todayTableBody.appendChild(row);
@@ -1243,7 +1311,7 @@
             if (allTransactions.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td colspan="6" class="text-center py-4">
+                    <td colspan="7" class="text-center py-4">
                         <i class="bi bi-database-x" style="font-size: 2rem; color: var(--secondary);"></i>
                         <p class="mt-2 text-muted">No transactions found</p>
                     </td>
@@ -1256,9 +1324,11 @@
                     const time = new Date(t.timestamp);
                     const statusClass = t.status === 'success' ? 'success' :
                         (t.status === 'pending' ? 'pending' :
-                            (t.status === 'failed' ? 'failed' : 'cancelled'));
+                            (t.status === 'failed' ? 'failed' : 
+                             t.status === 'reversed' ? 'reversed' : 'cancelled'));
                     const statusIcon = t.status === 'success' ? 'check-circle' :
-                        (t.status === 'pending' ? 'clock' : 'x-circle');
+                        (t.status === 'pending' ? 'clock' : 
+                         t.status === 'reversed' ? 'arrow-counterclockwise' : 'x-circle');
                     const statusText = t.status.charAt(0).toUpperCase() + t.status.slice(1);
 
                     row.innerHTML = `
@@ -1283,8 +1353,18 @@
                         </td>
                         <td>
                             <code class="small text-muted">
-                                ${t.id ? t.id.substring(0, 8) + '...' : 'N/A'}
+                                ${t.receipt ? t.receipt.substring(0, 8) + '...' : t.id.substring(0, 8) + '...'}
                             </code>
+                        </td>
+                        <td>
+                            ${t.status === 'success' ? 
+                                `<button class="btn-reverse" onclick="initiateReversal('${t.receipt}', ${t.amount})">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    Reverse
+                                </button>` : 
+                             t.status === 'reversed' ? 
+                                `<span class="text-muted small">Reversed</span>` : 
+                                ''}
                         </td>
                     `;
                     allTableBody.appendChild(row);
@@ -1311,11 +1391,12 @@
             const successful = filteredTransactions.filter(t => t.status === 'success');
             const failed = filteredTransactions.filter(t => t.status === 'failed');
             const cancelled = filteredTransactions.filter(t => t.status === 'cancelled');
+            const reversed = filteredTransactions.filter(t => t.status === 'reversed');
 
             const totalRevenue = successful.reduce((sum, t) => sum + t.amount, 0);
 
             // Calculate success rate
-            const totalProcessed = successful.length + failed.length + cancelled.length;
+            const totalProcessed = successful.length + failed.length + cancelled.length + reversed.length;
             const successRate = totalProcessed > 0 ? (successful.length / totalProcessed * 100) : 0;
 
             // Update analytics UI
@@ -1366,7 +1447,7 @@
 
             // Draw Charts
             drawRevenueChart(filteredTransactions);
-            drawDistributionChart(successful.length, failed.length, cancelled.length);
+            drawDistributionChart(successful.length, failed.length, cancelled.length, reversed.length);
         }
 
         function drawRevenueChart(transactions) {
@@ -1406,13 +1487,14 @@
             });
         }
 
-        function drawDistributionChart(s, f, c) {
+        function drawDistributionChart(s, f, c, r) {
             const chart = document.getElementById('distribution-chart');
             chart.innerHTML = '';
-            const total = s + f + c || 1;
+            const total = s + f + c + r || 1;
             const sp = (s / total) * 100;
             const fp = (f / total) * 100;
             const cp = (c / total) * 100;
+            const rp = (r / total) * 100;
 
             chart.innerHTML = `
                 <div class="w-100 h-100 d-flex flex-column justify-content-center px-3">
@@ -1420,11 +1502,13 @@
                         <div class="progress-bar bg-success" style="width: ${sp}%" title="Success"></div>
                         <div class="progress-bar bg-danger" style="width: ${fp}%" title="Failed"></div>
                         <div class="progress-bar bg-secondary" style="width: ${cp}%" title="Cancelled"></div>
+                        <div class="progress-bar bg-warning" style="width: ${rp}%" title="Reversed"></div>
                     </div>
                     <div class="d-flex justify-content-between small">
                         <span><i class="bi bi-circle-fill text-success me-1"></i> Success</span>
                         <span><i class="bi bi-circle-fill text-danger me-1"></i> Failed</span>
                         <span><i class="bi bi-circle-fill text-secondary me-1"></i> Cancelled</span>
+                        <span><i class="bi bi-circle-fill text-warning me-1"></i> Reversed</span>
                     </div>
                 </div>
             `;
@@ -1461,7 +1545,8 @@
                             const existingIndex = allTransactions.findIndex(t => t.id === payload.new.checkout_request_id);
                             const newTx = {
                                 id: payload.new.checkout_request_id,
-                                phone: payload.new.phone_number,
+                                receipt: payload.new.mpesa_receipt || payload.new.checkout_request_id,
+                                phone: payload.new.phone_number || payload.new.phone,
                                 amount: parseFloat(payload.new.amount) || 0,
                                 status: payload.new.status,
                                 date: new Date(payload.new.created_at),

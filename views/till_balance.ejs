@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Pesa Balance Sync</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        :root {
+            --mpesa-green: #28a745;
+            --mpesa-dark: #1e7e34;
+        }
+        body { background-color: #f4f7f6; margin: 0; padding: 0; }
+        .balance-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            margin: 80px auto;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .icon-header { font-size: 60px; margin-bottom: 15px; }
+        
+        .status-badge {
+            padding: 12px 24px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        .status-success { background: #e8f5e9; color: var(--mpesa-dark); border: 1px solid #c8e6c9; }
+        .status-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        /* Real-time Balance Display Styles */
+        .live-balance-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid var(--mpesa-green);
+            animation: fadeIn 0.5s ease-in;
+        }
+        .balance-item { margin-bottom: 10px; }
+        .balance-label { font-size: 12px; color: #666; text-transform: uppercase; }
+        .balance-value { font-size: 28px; font-weight: bold; color: #333; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .loader-dots {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+        .loader-dots div {
+            width: 12px;
+            height: 12px;
+            margin: 0 6px;
+            background: var(--mpesa-green);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .loader-dots div:nth-child(1) { animation-delay: -0.32s; }
+        .loader-dots div:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        .countdown-text { color: #555; line-height: 1.6; margin-top: 20px; }
+        
+        hr { border: 0; border-top: 1px solid #eee; margin: 30px 0; }
+        
+        .btn-back {
+            text-decoration: none;
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-back:hover { background: #5a6268; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="balance-card">
+            <% if (locals.data && data.ResponseCode === "0") { %>
+                <div class="icon-header">📡</div>
+                <h2>Syncing Real-time Balance</h2>
+                <p>Request for <strong>Till: 4938110</strong> acknowledged.</p>
+                
+                <div class="status-badge status-success">
+                    ✔ <%= data.ResponseDescription %>
+                </div>
+
+                <div id="loading-ui">
+                    <div class="loader-dots">
+                        <div></div><div></div><div></div>
+                    </div>
+                    <p class="countdown-text">Waiting for Safaricom callback...</p>
+                    <p style="font-size: 0.8em; color: #999;">This usually takes 10-20 seconds.</p>
+                </div>
+
+                <div id="balance-display" class="live-balance-box">
+                    <div id="balance-list"></div>
+                </div>
+
+            <% } else { %>
+                <div class="icon-header">⚠️</div>
+                <h2>Request Failed</h2>
+                <div class="status-badge status-error">
+                    ✖ <%= (locals.data && data.errorMessage) ? data.errorMessage : "Connection Error" %>
+                </div>
+            <% } %>
+
+            <hr>
+            <a href="/admin/dashboard" class="btn-back">Return to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        const balanceDisplay = document.getElementById('balance-display');
+        const loadingUi = document.getElementById('loading-ui');
+        const balanceList = document.getElementById('balance-list');
+
+        if (loadingUi) {
+            let pollCount = 0;
+            const maxPolls = 30; // Increased to 60 seconds (30 polls * 2s) for Render/Safaricom latency
+
+            const pollInterval = setInterval(async () => {
+                pollCount++;
+                try {
+                    // Changed path to /admin/api/... to ensure it hits your router correctly
+                    const response = await fetch('/admin/api/get-latest-balances');
+                    const balances = await response.json();
+
+                    if (balances && balances.length > 0) {
+                        const lastUpdate = new Date(balances[0].updated_at).getTime();
+                        const now = new Date().getTime();
+
+                        // Increased window to 5 minutes (300000ms) to bypass server/client time desync
+                        if (now - lastUpdate < 300000) {
+                            clearInterval(pollInterval);
+                            renderBalances(balances);
+                        }
+                    }
+                } catch (err) {
+                    console.error("Polling error:", err);
+                }
+
+                if (pollCount >= maxPolls) {
+                    clearInterval(pollInterval);
+                    loadingUi.innerHTML = `
+                        <p style='color:red; font-weight:bold;'>Polling Timed Out</p>
+                        <p style='font-size:0.85em;'>Safaricom callback is delayed or the ResultURL is unreachable. Please check your Render logs.</p>
+                    `;
+                }
+            }, 2000); 
+        }
+
+        function renderBalances(data) {
+            loadingUi.style.display = 'none';
+            balanceDisplay.style.display = 'block';
+            balanceList.innerHTML = data.map(acc => `
+                <div class="balance-item">
+                    <div class="balance-label">${acc.account_type}</div>
+                    <div class="balance-value">${acc.currency} ${parseFloat(acc.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                </div>
+            `).join('<hr style="margin:10px 0; border-top:1px dashed #ddd;">');
+        }
+    </script>
+</body>
+</html>

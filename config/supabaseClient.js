@@ -9,6 +9,9 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error("❌ ERROR: Supabase variables are missing from .env!");
+} else {
+  console.log("✅ Supabase Client Initialized");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Added .trim() to ensure no hidden spaces cause the 'Invalid API key' error
+export const supabase = createClient(supabaseUrl, supabaseKey.trim());

@@ -30,18 +30,18 @@ router.post("/lipaNaMpesa", authToken, async (req, res) => {
     const stkUrl = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'; 
 
     const body = {
-      "BusinessShortCode": process.env.BusinessShortCode,
-      "Password": password,
-      "Timestamp": timestamp,
-      "TransactionType": "CustomerBuyGoodsOnline",
-      "Amount": totalAmount, // Includes the 5 KES fee
-      "PartyA": phoneNumber,
-      "PartyB": "4938110",
-      "PhoneNumber": phoneNumber,
-      "CallBackURL": callbackURL,
-      "AccountReference": "CMT1234RT",
-      "TransactionDesc": serviceName 
-    };
+  "BusinessShortCode": process.env.BusinessShortCode, // Set this to 9203342 in .env
+  "Password": password,
+  "Timestamp": timestamp,
+  "TransactionType": "CustomerBuyGoodsOnline",
+  "Amount": totalAmount, 
+  "PartyA": phoneNumber,
+  "PartyB": process.env.MPESA_TILL_NUMBER,          // Set this to 4938110 in .env
+  "PhoneNumber": phoneNumber,
+  "CallBackURL": callbackURL,
+  "AccountReference": "CMT1234RT",
+  "TransactionDesc": serviceName 
+};
 
     const response = await axios.post(stkUrl, body, {
       headers: { 'Authorization': `Bearer ${access_token}`, 'Content-Type': 'application/json' }

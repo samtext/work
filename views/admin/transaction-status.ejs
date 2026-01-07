@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Status - <%= transactionId %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .status-card { border-left: 5px solid #007bff; }
+        .details-table th { width: 40%; background: #f8f9fa; }
+        .loading-spinner { width: 1rem; height: 1rem; }
+        /* Added a small success style for the box update */
+        .bg-light-success { background-color: #d4edda !important; border-color: #c3e6cb !important; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm status-card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 text-primary">Status Query Details</h4>
+                        <a href="/admin/dashboard" class="btn btn-outline-secondary btn-sm">Back to Dashboard</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert <%= responseCode === '0' ? 'alert-success' : 'alert-danger' %> mb-4">
+                            <strong>M-Pesa Response:</strong> <%= responseDescription %>
+                        </div>
+
+                        <table class="table table-bordered details-table">
+                            <tr>
+                                <th>Transaction Receipt</th>
+                                <td><strong><%= transactionId %></strong></td>
+                            </tr>
+                            <tr>
+                                <th>Sender Name</th>
+                                <td id="senderName">
+                                    <div class="spinner-border loading-spinner text-primary" role="status"></div>
+                                    <span class="text-muted ms-2 italic">Awaiting callback...</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Final Status</th>
+                                <td id="finalStatus">
+                                    <span class="badge bg-warning text-dark">Query Initiated</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Conversation ID</th>
+                                <td><code class="small"><%= conversationId %></code></td>
+                            </tr>
+                            <tr>
+                                <th>Originator ID</th>
+                                <td><code class="small"><%= originatorId %></code></td>
+                            </tr>
+                        </table>
+
+                        <div id="nextStepsBox" class="mt-4 p-3 bg-white border rounded">
+                            <h6 class="text-muted mb-2">Next Steps:</h6>
+                            <p class="small mb-0">
+                                Safaricom has accepted this query. We are now waiting for the M-Pesa API to send the full transaction details to our callback handler. This page will update automatically.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // RETAINED ORIGINAL VARIABLES
+        const convId = "<%= conversationId %>";
+        const receipt = "<%= transactionId %>";
+        
+        // NEW REAL-TIME PULL LOGIC (SSE)
+        // This connects to the stream route we created in the controller
+        const eventSource = new EventSource(`/admin/status-stream/${convId}`);
+
+        eventSource.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                
+                if (data && data.sender) {
+                    // Update Sender Name
+                    document.getElementById('senderName').innerHTML = `<strong>${data.sender}</strong>`;
+                    
+                    // Update Status Badge (Logic from your original code)
+                    const status = data.status;
+                    const statusBadge = (status === 'Completed' || status === 'Success') 
+                        ? '<span class="badge bg-success">Completed</span>' 
+                        : `<span class="badge bg-info text-dark">${status}</span>`;
+                    
+                    document.getElementById('finalStatus').innerHTML = statusBadge;
+                    
+                    // Update Next Steps Box (Logic from your original code)
+                    const nextSteps = document.getElementById('nextStepsBox');
+                    nextSteps.classList.replace('bg-white', 'bg-light-success');
+                    nextSteps.innerHTML = '<h6 class="text-success">Update Received</h6><p class="small mb-0">The transaction details have been pulled directly from M-Pesa successfully.</p>';
+                    
+                    // Close the connection as we have received the data
+                    eventSource.close();
+                }
+            } catch (err) {
+                console.error("Error processing real-time update:", err);
+            }
+        };
+
+        eventSource.onerror = (err) => {
+            console.log("Listening for M-Pesa callback update...");
+            // Keep the connection alive; the browser will automatically retry if the server is busy
+        };
+    </script>
+</body>
+</html>

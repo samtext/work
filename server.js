@@ -9,6 +9,8 @@ import nodemailer from 'nodemailer';
 import router from './controllers/lipaNaMpesa.js';
 import { callback } from './controllers/lipaCallback.js';
 import adminRoutes from './routes/admin.js';
+import balanceController from './controllers/balanceController.js'; 
+import reversalController from './controllers/reversalController.js'; // NEW: Import Reversal Controller
 
 dotenv.config();
 const app = express();
@@ -24,8 +26,7 @@ app.use(express.json());
 // --- KEEP YOUR ORIGINAL STATIC ROUTE ---
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
-// --- ADDITION FOR PWA: SERVE MANIFEST AND SW FROM ROOT ---
-// This ensures the browser can find /manifest.json and /sw.js directly
+// --- ADDITION FOR PWA ---
 app.get('/manifest.json', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 });
@@ -61,6 +62,15 @@ const sendAlert = (offendingIp) => {
 const ipWhitelist = (req, res, next) => {
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const allowedIp = process.env.ALLOWED_IP || '197.232.6.149';
+    
+    // EXEMPT SAFARICOM CALLBACKS FROM IP CHECK
+    // Allow both balance and reversal result/timeout URLs
+    if (req.path.includes('api/balance-result') || 
+        req.path.includes('api/reversal-result') || 
+        req.path.includes('api/reversal-timeout')) {
+        return next();
+    }
+
     if (clientIp.includes(allowedIp) || clientIp.includes('127.0.0.1') || clientIp === '::1') {
         next();
     } else {
@@ -73,12 +83,18 @@ const ipWhitelist = (req, res, next) => {
 app.use(router);
 app.use(callback);
 
-// 1. HOME (Marketplace Catalog)
+// --- GLOBAL CALLBACK ROUTES ---
+app.post("/api/balance-result", balanceController.handleBalanceCallback);
+// NEW: Global routes for reversal results to ensure they bypass admin auth/IP blocks
+app.post("/api/reversal-result", reversalController.handleReversalCallback);
+app.post("/api/reversal-timeout", reversalController.handleReversalCallback);
+
+// 1. HOME
 app.get("/", (req, res) => {
   res.render('index'); 
 });
 
-// 2. PAYMENT PAGE (The M-Pesa Form)
+// 2. PAYMENT PAGE
 app.get("/service-payment", (req, res) => {
   res.render('payment', { failedMessage: null, successMessage: null });
 });

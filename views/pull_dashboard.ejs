@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/main.css"> 
+    <title>Pull Transactions Dashboard</title>
+    <style>
+        /* Styles for reconciliation */
+        .missing-row { background-color: #fff4f4; border-left: 4px solid #ff4d4d; }
+        .synced-row { background-color: #f4fff4; border-left: 4px solid #28a745; }
+        .badge-missing { background: #ff4d4d; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .badge-synced { background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .sync-btn { cursor: pointer; background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; transition: 0.3s; }
+        .sync-btn:hover { background: #0056b3; }
+        
+        table { width:100%; border-collapse: collapse; margin-top: 20px; font-family: sans-serif; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .container { padding: 20px; max-width: 1200px; margin: auto; }
+        .error-box { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .customer-text { font-size: 0.9em; color: #555; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>M-Pesa Pull Transactions (Last 24-48 Hours)</h2>
+        <p><strong>Shortcode:</strong> 7450249 | <strong>Till:</strong> 4938110</p>
+
+        <% if (locals.error) { %>
+            <div class="error-box">
+                <strong>Notice:</strong> <%= error %>
+            </div>
+        <% } %>
+
+        <table>
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th>Receipt No</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (transactions && transactions.length > 0) { %>
+                    <% transactions.forEach(tx => { %>
+                        <tr class="<%= (typeof tx.isMissing !== 'undefined') ? (tx.isMissing ? 'missing-row' : 'synced-row') : '' %>">
+                            <td><strong><%= tx.MpesaReceiptNumber %></strong></td>
+                            <td><%= tx.TransactionDate %></td>
+                            <td>
+                                <span class="customer-text">
+                                    <%= tx.CustomerName || '---' %>
+                                </span>
+                            </td>
+                            <td><%= tx.PhoneNumber %></td>
+                            <td>KES <%= tx.Amount %></td>
+                            <td>
+                                <% if (typeof tx.isMissing !== 'undefined') { %>
+                                    <% if (tx.isMissing) { %>
+                                        <span class="badge-missing">Missing in DB</span>
+                                    <% } else { %>
+                                        <span class="badge-synced">Synced</span>
+                                    <% } %>
+                                <% } else { %>
+                                    <span style="color: #666;">Verified (Safaricom)</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if (typeof tx.isMissing !== 'undefined' && tx.isMissing) { %>
+                                    <button class="sync-btn" onclick='syncTransaction(<%= JSON.stringify(tx) %>)'>
+                                        Manual Sync
+                                    </button>
+                                <% } else if (typeof tx.isMissing === 'undefined') { %>
+                                     <button class="sync-btn" style="background: #6c757d;" onclick='syncTransaction(<%= JSON.stringify(tx) %>)'>
+                                        Force Sync
+                                    </button>
+                                <% } else { %>
+                                    <span style="color: #28a745;">✓</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding: 40px; color: #666;">
+                            No transactions found. <br>
+                            <small>Note: Only transactions from the last 48 hours will appear here.</small>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+        
+        <br>
+        <div style="margin-top: 20px;">
+            <a href="/admin/dashboard" style="text-decoration: none; color: #007bff;">← Back to Main Admin</a>
+            <span style="margin: 0 10px; color: #ccc;">|</span>
+            <a href="javascript:location.reload()" style="text-decoration: none; color: #28a745;">Refresh List</a>
+        </div>
+    </div>
+
+    <script>
+        async function syncTransaction(tx) {
+            if(!confirm(`Sync transaction ${tx.MpesaReceiptNumber} to your database?`)) return;
+
+            try {
+                // Maintained your /admin/ prefix as per your update
+                const response = await fetch('/admin/sync-missing', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(tx)
+                });
+                
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Successfully synced to Database!');
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + (result.error || 'Check server logs.'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error during sync.');
+            }
+        }
+    </script>
+</body>
+</html>
