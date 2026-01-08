@@ -3,433 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servio | Online Services </title>
-    
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#1dbf73">
-    <link rel="apple-touch-icon" href="/static/images/icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/icons/icon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/icons/icon-16.png">
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Airtel Airtime Bundles</title>
     <style>
-        :root { 
-            --fiverr-green: #1dbf73; 
-            --dark-bg: #222325;
-            --border-light: #e4e5e7;
-            --fiverr-dark-green: #003912;
-        }
+        body { background-color: #f3f4f6; font-family: sans-serif; }
+        .airtel-gradient { background: linear-gradient(to right, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        /* Ensuring text doesn't overflow on very small screens */
+        .card-title { font-size: clamp(0.75rem, 3vw, 1.25rem); }
         
-        body { font-family: 'Inter', sans-serif; color: #404145; margin: 0; padding-bottom: 80px; }
-
-        /* --- TOP NAV --- */
-        .main-header {
-            border-bottom: 1px solid var(--border-light);
-            padding: 10px 0;
-            background: #fff;
-            position: relative;
-            z-index: 1100;
-        }
-        .navbar-brand { color: #000 !important; font-weight: 800; font-size: 1.8rem; letter-spacing: -1px; text-decoration: none; display: flex; align-items: center; }
-        .navbar-brand span { color: var(--fiverr-green); }
-        .navbar-brand img { height: 40px; margin-right: 10px; } /* Style for the new logo */
-
-        .search-bar-header {
-            flex-grow: 1;
-            max-width: 450px;
-            display: flex;
-            border: 1px solid #b5b6ba;
-            border-radius: 4px;
-            margin-left: 20px;
-        }
-        .search-bar-header input { border: none; padding: 8px 15px; width: 100%; outline: none; }
-        .search-bar-header .btn-search { background: var(--dark-bg); color: white; border: none; padding: 0 15px; }
-
-        /* --- STICKY SCROLL NAV --- */
-        .sticky-scroll-nav {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            background: white;
-            border-bottom: 1px solid var(--border-light);
-            z-index: 1040;
-            transform: translateY(-100%);
-            transition: transform 0.3s ease-in-out;
-            padding: 8px 0;
-            display: none;
-        }
-        .sticky-scroll-nav.visible { transform: translateY(0); display: block; }
-        .scroll-cat-list { display: flex; gap: 20px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; padding: 5px 0; }
-        .scroll-cat-list::-webkit-scrollbar { display: none; }
-        .scroll-cat-link { text-decoration: none; color: #62646a; font-size: 0.9rem; font-weight: 600; }
-        .scroll-cat-link:hover { color: var(--fiverr-green); }
-
-        /* --- HERO SECTION --- */
-        .hero-banner {
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                        url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400');
-            background-size: cover;
-            background-position: center;
-            padding: 100px 0 80px 0;
-            color: white;
-        }
-        .hero-h1 { font-size: 3.5rem; font-weight: 500; margin-bottom: 30px; letter-spacing: -1px; line-height: 1.1; }
-        
-        .hero-search {
-            max-width: 800px;
-            background: white;
-            border-radius: 8px;
-            display: flex;
-            padding: 4px;
-            margin-bottom: 25px;
-        }
-        .hero-search input { border: none; flex-grow: 1; padding: 12px 20px; font-size: 1.1rem; outline: none; border-radius: 8px 0 0 8px; color: #333; }
-        .hero-search .btn-hero-search { background: #222325; color: white; border: none; padding: 0 25px; border-radius: 6px; }
-
-        .hero-pills { display: flex; gap: 10px; flex-wrap: wrap; }
-        .pill-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid white;
-            color: white;
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        .pill-btn:hover { background: white; color: black; }
-
-        /* --- POPULAR SERVICES --- */
-        .popular-row {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .popular-row::-webkit-scrollbar { display: none; }
-        
-        .popular-item {
-            flex: 0 0 auto;
-            width: 20%; 
-            padding: 0 8px;
-        }
-
-        .service-card {
-            width: 100%;
-            height: 250px;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            color: white;
-            background-color: var(--fiverr-dark-green);
-            transition: 0.2s;
-        }
-        .service-card h5 { font-weight: 700; font-size: 1.2rem; }
-        .pop-card-btns { display: flex; flex-direction: column; gap: 10px; }
-        .btn-pop-order { background: var(--fiverr-green); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; }
-        .btn-pop-price { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 10px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; transition: 0.3s; }
-        .btn-pop-price:hover { background: rgba(255,255,255,0.3); }
-
-        /* --- PRODUCT GRID --- */
-        .gig-card { border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; background: #fff; transition: 0.3s; height: 100%; }
-        .gig-card:hover { box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        .gig-img { height: 170px; background-size: cover; background-position: center; position: relative; }
-        .gig-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
-        .gig-card:hover .gig-overlay { opacity: 1; }
-        .gig-body { padding: 12px; }
-        .gig-title { font-size: 14px; height: 40px; overflow: hidden; margin-bottom: 10px; color: #222325; }
-        .btn-quickview { background: white; color: #222325; border: none; padding: 8px 15px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; }
-        .btn-add-cart { width: 100%; background: var(--fiverr-green); color: white; border: none; padding: 8px; border-radius: 4px; font-weight: 700; margin-top: 10px; font-size: 0.85rem; }
-        .price-row { border-top: 1px solid var(--border-light); padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .price { font-weight: 800; color: #404145; }
-
-        /* --- FOOTER --- */
-        .main-footer { border-top: 1px solid var(--border-light); padding-top: 50px; background: #fff; margin-top: 60px; }
-        .footer-col h6 { font-weight: 700; color: #404145; margin-bottom: 20px; }
-        .footer-list { list-style: none; padding: 0; }
-        .footer-list li { margin-bottom: 12px; }
-        .footer-list a { text-decoration: none; color: #74767e; font-size: 0.95rem; }
-        .footer-bottom { border-top: 1px solid var(--border-light); padding: 25px 0; margin-top: 40px; }
-        .social-links a { color: #74767e; font-size: 1.2rem; margin-left: 20px; }
-
+        /* Modal Overlay Style */
+        .modal-overlay { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
     </style>
 </head>
-<body>
+<body class="p-2 md:p-8">
 
-    <header class="main-header" id="topHeader">
-        <div class="container d-flex align-items-center">
-            <a class="navbar-brand" href="#">
-                Ser<span>vio</span>
-            </a>
-            <div class="search-bar-header d-flex">
-                <input type="text" id="headerSearch" placeholder="What service are you looking for today?">
-                <button class="btn-search"><i class="bi bi-search"></i></button>
-            </div>
-            <div class="ms-auto d-flex align-items-center">
-                <a href="/service-payment" class="nav-link px-3 fw-bold text-muted small">Xeco Pay</a>
-                <a href="/" class="nav-link px-3 fw-bold text-muted small">Servio Pro</a>
-                <a href="#" class="nav-link px-3 fw-bold text-muted small">Order Service</a>
-                <a href="#" class="nav-link px-3 fw-bold text-muted small">Sign In</a>
-                <a href="#" class="btn btn-outline-dark fw-bold px-4 py-1 ms-2">Join</a>
-            </div>
-        </div>
-    </header>
-
-    <nav class="sticky-scroll-nav" id="stickyNav">
-        <div class="container">
-            <div class="scroll-cat-list">
-                <a href="#" class="scroll-cat-link">Trending <i class="bi bi-fire text-danger"></i></a>
-                <a href="#" class="scroll-cat-link">Graphics & Design</a>
-                <a href="#" class="scroll-cat-link">Programming & Tech</a>
-                <a href="#" class="scroll-cat-link">Digital Marketing</a>
-                <a href="#" class="scroll-cat-link">Video & Animation</a>
-                <a href="#" class="scroll-cat-link">Writing & Translation</a>
-                <a href="#" class="scroll-cat-link">Music & Audio</a>
-                <a href="#" class="scroll-cat-link">Business</a>
-                <a href="#" class="scroll-cat-link">Data</a>
-            </div>
-        </div>
-    </nav>
-
-    <section class="hero-banner" id="heroArea">
-        <div class="container">
-            <h1 class="hero-h1">Our freelancers <br> will take it from here</h1>
-            <div class="hero-search">
-                <input type="text" id="heroSearchInput" placeholder="Search for any service...">
-                <button class="btn-hero-search"><i class="bi bi-search"></i></button>
-            </div>
-            <div class="hero-pills">
-                <div class="pill-btn" onclick="fillSearch('Website Development')">Website Development →</div>
-                <div class="pill-btn" onclick="fillSearch('Architecture & Interior Design')">Architecture & Interior →</div>
-                <div class="pill-btn" onclick="fillSearch('Video Editing')">Video Editing →</div>
-                <div class="pill-btn" onclick="fillSearch('UGC Videos')">UGC Videos →</div>
-                <div class="pill-btn" onclick="fillSearch('Book Publishing')">Book Publishing →</div>
-                
-            </div>
-        </div>
-    </section>
-
-    <div class="container py-5">
-        <h2 class="fw-bold mb-4" style="color: #404145; font-size: 2.2rem;">Popular services</h2>
-        <div class="popular-row">
-
-            <div class="popular-item">
-                <div class="service-card">
-                    <h5>Vibe Coding</h5>
-                    <div class="pop-card-btns">
-                        <button class="btn-pop-order" onclick="addToCart()">Order Service</button>
-                        <button class="btn-pop-price" onclick="viewPopularPrice('Vibe Coding', '4,500')">View Price</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="popular-item">
-                <div class="service-card">
-                    <h5>Website Development</h5>
-                    <div class="pop-card-btns">
-                        <button class="btn-pop-order" onclick="addToCart()">Order Service</button>
-                        <button class="btn-pop-price" onclick="viewPopularPrice('Website Development', '15,000')">View Price</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="popular-item">
-                <div class="service-card">
-                    <h5>Video Editing</h5>
-                    <div class="pop-card-btns">
-                        <button class="btn-pop-order" onclick="addToCart()">Order Service</button>
-                        <button class="btn-pop-price" onclick="viewPopularPrice('Video Editing', '3,500')">View Price</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="popular-item">
-                <div class="service-card">
-                    <h5>Software Development</h5>
-                    <div class="pop-card-btns">
-                        <button class="btn-pop-order" onclick="addToCart()">Order Service</button>
-                        <button class="btn-pop-price" onclick="viewPopularPrice('Software Development', '30,000')">View Price</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="popular-item">
-                <div class="service-card">
-                    <h5>Book Publishing</h5>
-                    <div class="pop-card-btns">
-                        <button class="btn-pop-order" onclick="addToCart()">Order Service</button>
-                        <button class="btn-pop-price" onclick="viewPopularPrice('Book Publishing', '10,000')">View Price</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+    <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold airtel-gradient flex items-center justify-center gap-2">
+            🚀 Airtel Airtime
+        </h1>
+        <p class="text-blue-500 font-semibold text-sm">Amazing Airtime Top-ups!</p>
+        <div class="w-12 h-1 bg-blue-300 mx-auto mt-2 rounded-full"></div>
     </div>
 
-    <div class="container py-4">
-        <h4 class="fw-bold mb-4">Professional Services</h4>
-        <div class="row g-4" id="productGrid"></div>
-    </div>
-
-    <div class="modal fade" id="qvModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" id="qvContent"></div>
-        </div>
-    </div>
-
-    <footer class="main-footer">
-        <div class="container">
-            <div class="row gy-4">
-                <div class="col-6 col-md-3 footer-col">
-                    <h6>Categories</h6>
-                    <ul class="footer-list">
-                        <li><a href="#">Graphics & Design</a></li>
-                        <li><a href="#">Digital Marketing</a></li>
-                        <li><a href="#">Writing & Translation</a></li>
-                        <li><a href="#">Video & Animation</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-3 footer-col">
-                    <h6>About</h6>
-                    <ul class="footer-list">
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Press & News</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-3 footer-col">
-                    <h6>Support</h6>
-                    <ul class="footer-list">
-                        <li><a href="#">Help & Support</a></li>
-                        <li><a href="#">Trust & Safety</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-3 footer-col">
-                    <h6>Community</h6>
-                    <ul class="footer-list">
-                        <li><a href="#">Forum</a></li>
-                        <li><a href="#">Events</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-6 col-md-3 footer-col">
-                    <h6>Usefull Links</h6>
-                    <ul class="footer-list">
-                        <li><a href="/service-payment">Pay With Xeco Pay</a></li>
-                        <li><a href="/">Youth Corner</a></li>
-                    </ul>
-                </div>
-            <div class="footer-bottom d-flex flex-column flex-md-row align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                    <a href="#" class="navbar-brand me-3" style="font-size: 1.4rem;">
-                         <img src="" style="height: 30px;"> Ser<span>vio</span>
-                    </a>
-                    <span class="text-muted small">© Servio International Ltd. 2026</span>
-                </div>
-                <div class="social-links mt-3 mt-md-0">
-                    <a href="#"><i class="bi bi-tiktok"></i></a>
-                    <a href="#"><i class="bi bi-instagram"></i></a>
-                    <a href="#"><i class="bi bi-linkedin"></i></a>
-                    <a href="#"><i class="bi bi-facebook"></i></a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const products = [
-            { id: 1, title: "I will build a responsive professional website", price: "5,000", img: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=400" },
-            { id: 2, title: "I will design a unique minimalist brand logo", price: "2,500", img: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400" },
-            { id: 3, title: "I will handle all your digital marketing and SEO", price: "3,000", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400" },
-            { id: 4, title: "I will provide professional video editing", price: "4,000", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400" },
-            { id: 5, title: "I will provide high quality business consulting", price: "10,000", img: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400" },
-            { id: 6, title: "I will setup your Shopify store", price: "7,500", img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400" },
-            { id: 7, title: "I will be your professional virtual assistant", price: "1,500", img: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400" },
-            { id: 8, title: "I will write SEO optimized blog posts", price: "1,200", img: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=400" },
-            { id: 9, title: "I will create stunning UI/UX designs", price: "8,000", img: "https://images.unsplash.com/photo-1534670007418-fbb7f6cf32c3?w=400" },
-            { id: 10, title: "I will offer professional voice over services", price: "2,000", img: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400" },
-            { id: 11, title: "I will design architectural 3D floor plans", price: "12,000", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400" },
-            { id: 12, title: "I will create custom AI generated artwork", price: "3,500", img: "https://images.unsplash.com/photo-1675271591211-126ad94e495d?w=400" }
+    <div class="grid grid-cols-3 gap-2 md:gap-6 max-w-6xl mx-auto">
+        
+        <script>
+            const airtimeValues = [10, 20, 50, 100, 200, 500, 1000, 1500, 2000, 3000];
             
-        ];
-
-        window.addEventListener('scroll', function() {
-            const stickyNav = document.getElementById('stickyNav');
-            const heroHeight = document.getElementById('heroArea').offsetHeight;
-            if (window.scrollY > heroHeight) { stickyNav.classList.add('visible'); }
-            else { stickyNav.classList.remove('visible'); }
-        });
-
-        function fillSearch(term) {
-            document.getElementById('heroSearchInput').value = term;
-            document.getElementById('headerSearch').value = term;
-            document.getElementById('heroSearchInput').focus();
-        }
-
-        function viewPopularPrice(serviceName, price) {
-            document.getElementById('qvContent').innerHTML = `
-                <div class="modal-header border-0 pb-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body text-center p-5">
-                    <div class="display-6 mb-2" style="color: var(--fiverr-green)"><i class="bi bi-tag-fill"></i></div>
-                    <h5 class="fw-bold mb-1">${serviceName}</h5>
-                    <p class="text-muted small mb-4">Starting Price Package</p>
-                    <h2 class="fw-bold mb-4" style="color: #404145">Ksh ${price}</h2>
-                    <button class="btn btn-dark w-100 py-2" onclick="addToCart()" data-bs-dismiss="modal">Order Now</button>
-                </div>
-            `;
-            new bootstrap.Modal(document.getElementById('qvModal')).show();
-        }
-
-        function renderProducts() {
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = products.map(p => `
-                <div class="col-6 col-md-3">
-                    <div class="gig-card">
-                        <div class="gig-img" style="background-image: url('${p.img}')">
-                            <div class="gig-overlay"><button class="btn-quickview" onclick="openQV(${p.id})">Quick View</button></div>
+            airtimeValues.forEach(amount => {
+                document.write(`
+                    <div class="bg-white rounded-xl md:rounded-3xl shadow-sm border border-gray-100 p-2 md:p-6 relative flex flex-col items-center">
+                        <span class="absolute top-2 left-2 bg-gray-700 text-white text-[8px] md:text-xs px-1 md:px-3 py-0.5 rounded-full font-bold">Instant</span>
+                        
+                        <div class="w-10 h-10 md:w-20 md:h-20 mb-2 mt-4 flex items-center justify-center">
+                            <svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="none" stroke="#0ea5e9" stroke-width="2"/><path d="M30 50 L70 30 L55 70 L50 55 Z" fill="#9333ea"/></svg>
                         </div>
-                        <div class="gig-body">
-                            <div class="gig-title">${p.title}</div>
-                            <div class="price-row"><span class="text-muted small">STARTING AT</span><span class="price">Ksh ${p.price}</span></div>
-                            <button class="btn-add-cart" onclick="addToCart()">Add to Cart</button>
+
+                        <h2 class="card-title font-bold text-gray-800 text-center leading-tight">Bingwa Airtime</h2>
+                        <p class="text-purple-600 font-bold text-[8px] md:text-xs tracking-tighter md:tracking-widest uppercase mb-2 md:mb-6">Top Up</p>
+                        
+                        <div class="w-full text-left mb-2 md:mb-6">
+                            <p class="text-sm md:text-xl font-bold text-gray-900">Ksh ${amount}</p>
+                            <p class="text-gray-400 text-[9px] md:text-sm leading-none">Airtel credit</p>
                         </div>
+
+                        <div class="flex justify-between items-center w-full mb-3 md:mb-6">
+                            <div class="bg-green-600 text-white px-2 md:px-4 py-1 rounded-full text-[10px] md:text-base font-bold flex items-center">
+                                Buy <span class="ml-1 text-[8px] opacity-50 hidden md:inline">▶</span>
+                            </div>
+                            <div class="text-gray-400 text-[8px] md:text-xs flex items-center gap-1">
+                                ⚡
+                            </div>
+                        </div>
+
+                        <button onclick="openModal()" class="w-full bg-blue-600 text-white py-1.5 md:py-3 rounded-lg md:rounded-xl text-[10px] md:text-base font-bold hover:bg-blue-700 transition mb-1.5">Buy Now</button>
+                        <button class="w-full border border-gray-200 text-gray-700 py-1 md:py-3 rounded-lg md:rounded-xl text-[10px] md:text-base font-medium flex items-center justify-center gap-1 hover:bg-gray-50 transition">
+                            <i class="fab fa-whatsapp scale-75 md:scale-100"></i> <span class="hidden md:inline">Share</span>
+                        </button>
                     </div>
-                </div>
-            `).join('');
-        }
-
-        let cartTotal = 1;
-        function addToCart() { cartTotal++; alert('Service added to cart!'); }
-
-        function openQV(id) {
-            const p = products.find(x => x.id === id);
-            document.getElementById('qvContent').innerHTML = `
-                <div class="modal-header border-0 pb-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body text-center p-4">
-                    <img src="${p.img}" class="img-fluid rounded mb-3" style="max-height: 250px;">
-                    <h5 class="fw-bold">${p.title}</h5>
-                    <p class="text-muted">Professional freelance service delivered within 48 hours.</p>
-                    <h4 class="text-success fw-bold">Ksh ${p.price}</h4>
-                    <button class="btn btn-dark w-100 py-2 mt-3" onclick="addToCart()" data-bs-dismiss="modal">Add to Cart</button>
-                </div>
-            `;
-            new bootstrap.Modal(document.getElementById('qvModal')).show();
-        }
-
-        renderProducts();
-
-        /* --- PWA Service Worker Registration --- */
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker Registered'))
-                    .catch(err => console.log('Registration Failed', err));
+                `);
             });
+        </script>
+
+    </div>
+
+    <div id="purchaseModal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4">
+        <div class="bg-[#E5E7EB] w-full max-w-md rounded-[2rem] p-6 md:p-8 shadow-2xl">
+            <div class="flex justify-center mb-6">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="#001A8E"/>
+                    <circle cx="16" cy="16" r="4" fill="#009966"/>
+                </svg>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="radio" name="buyType" value="self" checked onclick="toggleFields()" class="w-5 h-5 accent-[#009966]">
+                    <span class="text-[#009966] font-bold text-lg md:text-xl">Buy for my number</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="radio" name="buyType" value="others" onclick="toggleFields()" class="w-5 h-5 accent-[#009966]">
+                    <span class="text-[#009966] font-bold text-lg md:text-xl">Buy for other number</span>
+                </label>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm md:text-base font-semibold mb-1">Number to receive offer</label>
+                    <input type="text" placeholder="Enter Number" class="w-full bg-gray-100 border border-gray-300 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div id="paymentField" class="hidden">
+                    <label class="block text-gray-700 text-sm md:text-base font-semibold mb-1">Number to make payment</label>
+                    <input type="text" placeholder="Enter Number" class="w-full bg-gray-100 border border-gray-300 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeModal()" class="flex-1 border-2 border-[#001A8E] text-[#001A8E] font-bold py-3 rounded-2xl hover:bg-gray-200 transition">
+                    Cancel
+                </button>
+                <button class="flex-1 bg-[#001A8E] text-white font-bold py-3 rounded-2xl hover:bg-blue-900 transition">
+                    Purchase
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('purchaseModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('purchaseModal').classList.add('hidden');
+        }
+
+        function toggleFields() {
+            const isOther = document.querySelector('input[name="buyType"]:checked').value === 'others';
+            const paymentField = document.getElementById('paymentField');
+            paymentField.classList.toggle('hidden', !isOther);
         }
     </script>
+    <div class="mt-10 text-center text-gray-400 text-xs">
+        © 2026 Airtel Bingwa Sokoni
+    </div>
+
 </body>
 </html>
