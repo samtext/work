@@ -9,14 +9,50 @@
     <style>
         body { background-color: #f3f4f6; font-family: sans-serif; }
         .airtel-gradient { background: linear-gradient(to right, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        /* Ensuring text doesn't overflow on very small screens */
         .card-title { font-size: clamp(0.75rem, 3vw, 1.25rem); }
         
         /* Modal Overlay Style */
         .modal-overlay { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
+
+        /* Zoom Out Animation */
+        @keyframes zoomOutCycle {
+            0% { opacity: 0; transform: scale(1.2); }
+            5% { opacity: 1; transform: scale(1); }
+            30% { opacity: 1; transform: scale(1); }
+            35% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 0; }
+        }
+        .animate-zoom { animation: zoomOutCycle 9s infinite; opacity: 0; }
     </style>
 </head>
 <body class="p-2 md:p-8">
+
+    <div class="max-w-6xl mx-auto mb-6">
+        <div class="relative bg-gradient-to-r from-blue-700 via-blue-600 to-purple-600 rounded-2xl p-4 md:p-8 overflow-hidden shadow-lg min-h-[140px] flex items-center">
+            <div class="flex-1 relative h-full">
+                <div class="animate-zoom absolute inset-0 flex flex-col justify-center">
+                    <h2 class="text-white text-2xl md:text-4xl font-bold">Stay Connected</h2>
+                    <p class="text-blue-100 text-sm md:text-lg">Save Bingwa Sokoni Till number 4185628 for offline buying.</p>
+                </div>
+                
+                <div class="animate-zoom absolute inset-0 flex flex-col justify-center" style="animation-delay: 3s;">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md">Save 4185628</span>
+                        <p class="text-white text-sm md:text-lg font-medium">For Bingwa Sokoni Data Bundles offline purchases.</p>
+                    </div>
+                </div>
+
+                <div class="animate-zoom absolute inset-0 flex flex-col justify-center" style="animation-delay: 6s;">
+                    <h2 class="text-white text-xl md:text-2xl font-bold italic">Instant Delivery ⚡</h2>
+                    <p class="text-blue-500 bg-white inline-block px-2 py-0.5 rounded text-xs font-bold mt-1">BEST RATES</p>
+                    <p class="text-white text-xs md:text-base mt-1">Get data bundles, airtime, SMS and minutes at the best rates.</p>
+                </div>
+            </div>
+            <div class="bg-white/20 p-4 rounded-2xl ml-4 hidden md:block">
+                <i class="fas fa-bolt text-white text-3xl animate-pulse"></i>
+            </div>
+        </div>
+    </div>
 
     <div class="text-center mb-6">
         <h1 class="text-2xl font-bold airtel-gradient flex items-center justify-center gap-2">
@@ -26,7 +62,7 @@
         <div class="w-12 h-1 bg-blue-300 mx-auto mt-2 rounded-full"></div>
     </div>
 
-    <div class="grid grid-cols-3 gap-2 md:gap-6 max-w-6xl mx-auto">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-6 max-w-6xl mx-auto">
         
         <script>
             const airtimeValues = [10, 20, 50, 100, 200, 500, 1000, 1500, 2000, 3000];
@@ -97,7 +133,7 @@
                 <div id="paymentField" class="hidden">
                     <label class="block text-gray-700 text-sm md:text-base font-semibold mb-1">Number to make payment</label>
                     <input type="text" placeholder="Enter Number" class="w-full bg-gray-100 border border-gray-300 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>a
+                </div>
             </div>
 
             <div class="flex gap-3 mt-8">
