@@ -7,10 +7,12 @@ import reversalController from '../controllers/reversalController.js';
 import statusController from '../controllers/statusController.js'; 
 // NEW: Import the Airtime Bridge Controller
 import airtimeBridgeController from '../controllers/airtimeBridgeController.js';
+// NEW: Import Statum service to show balance on dashboard
+import { getStatumBalance } from '../services/airtimeService.js';
 
 const router = express.Router();
 
-// 1. Your original Supabase dashboard
+// 1. Your original Supabase dashboard (Updated to include Statum Balance)
 router.get("/dashboard", async (req, res) => {
     try {
         const { data: transactions, error } = await supabase
@@ -31,10 +33,14 @@ router.get("/dashboard", async (req, res) => {
 
         if (balError) console.error("Error fetching balances:", balError.message);
 
+        // NEW: Fetch Statum Wallet Balance
+        const statumData = await getStatumBalance();
+
         res.render('admin_dashboard', { 
             transactions, 
             totalAmount, 
-            balances: balances || [] 
+            balances: balances || [],
+            statumBalance: statumData.available_balance || 0 // Pass balance to view
         });
     } catch (error) {
         console.error("Dashboard Error:", error.message);

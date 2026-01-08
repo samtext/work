@@ -6,11 +6,14 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import basicAuth from 'express-basic-auth'; 
 import nodemailer from 'nodemailer';
+import cron from 'node-cron'; // NEW: For automation
 import router from './controllers/lipaNaMpesa.js';
 import { callback } from './controllers/lipaCallback.js';
 import adminRoutes from './routes/admin.js';
 import balanceController from './controllers/balanceController.js'; 
-import reversalController from './controllers/reversalController.js'; // NEW: Import Reversal Controller
+import reversalController from './controllers/reversalController.js';
+import pullTransactions from './controllers/pullTransactionsController.js'; // Ensure this is exported correctly
+import airtimeBridgeController from './controllers/airtimeBridgeController.js'; // For automatic C2B
 
 dotenv.config();
 const app = express();
@@ -63,11 +66,12 @@ const ipWhitelist = (req, res, next) => {
     const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const allowedIp = process.env.ALLOWED_IP || '197.232.6.149';
     
-    // EXEMPT SAFARICOM CALLBACKS FROM IP CHECK
-    // Allow both balance and reversal result/timeout URLs
+    // EXEMPT SAFARICOM & STATUM CALLBACKS FROM IP CHECK
     if (req.path.includes('api/balance-result') || 
         req.path.includes('api/reversal-result') || 
-        req.path.includes('api/reversal-timeout')) {
+        req.path.includes('api/reversal-timeout') ||
+        req.path.includes('api/mpesa-to-airtime') || // NEW: Instant C2B
+        req.path.includes('api/statum-callback')) {  // NEW: Statum delivery reports
         return next();
     }
 
@@ -85,9 +89,15 @@ app.use(callback);
 
 // --- GLOBAL CALLBACK ROUTES ---
 app.post("/api/balance-result", balanceController.handleBalanceCallback);
-// NEW: Global routes for reversal results to ensure they bypass admin auth/IP blocks
 app.post("/api/reversal-result", reversalController.handleReversalCallback);
 app.post("/api/reversal-timeout", reversalController.handleReversalCallback);
+
+// --- NEW: AUTOMATIC BRIDGE ROUTES ---
+app.post("/api/mpesa-to-airtime", airtimeBridgeController.handleMpesaPayment);
+app.post("/api/statum-callback", (req, res) => {
+    console.log("STATUM DELIVERY REPORT:", req.body);
+    res.status(200).send("OK");
+});
 
 // 1. HOME
 app.get("/", (req, res) => {
@@ -125,6 +135,18 @@ app.use('/admin', ipWhitelist, basicAuth({
     };
     next();
 }, adminRoutes);
+
+// --- NEW: BACKGROUND AUTOMATION ---
+// This runs every 2 minutes to "Pull" any missed payments and send airtime automatically
+cron.schedule('*/2 * * * *', async () => {
+    console.log('--- [AUTO-SYNC] Checking for new payments... ---');
+    try {
+        const mockRes = { render: () => {}, status: () => ({ render: () => {} }) };
+        await pullTransactions.getPullDashboard({}, mockRes);
+    } catch (e) {
+        console.error('[AUTO-SYNC ERROR]:', e.message);
+    }
+});
 
 app.listen(port, () => {
   console.log(`Auri Pay Server running on port ${port}`);
