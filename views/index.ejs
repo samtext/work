@@ -25,7 +25,7 @@
         .mobile-container {
             width: 100%;
             max-width: 375px;
-            background: #ffffff;
+            background: #f4f5f7; 
             height: 812px;
             border-radius: 40px;
             border: 8px solid #222;
@@ -34,7 +34,7 @@
             box-shadow: 0 50px 100px rgba(0,0,0,0.8);
         }
 
-        /* Improved Header */
+        /* --- SNAPAY STYLE HEADER --- */
         header {
             padding: 50px 20px 20px;
             display: flex;
@@ -42,233 +42,268 @@
             align-items: center;
         }
 
-        .wallet-selector {
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: #4a4e8a; 
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .header-actions {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: #f0f0f0;
-            padding: 10px 18px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 13px;
-            transition: 0.3s;
-            cursor: pointer;
+            gap: 15px;
         }
-        
-        .wallet-selector:active { transform: scale(0.95); }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+        }
 
         .notification-bell {
             position: relative;
-            padding: 8px;
-            background: #f9f9f9;
-            border-radius: 50%;
         }
 
-        /* --- NEW REDESIGNED MAIN CARD --- */
+        .badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ff4d4d;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #f4f5f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6px;
+            color: white;
+        }
+
+        /* --- MAIN BALANCE CARD --- */
         .main-card {
             margin: 0 15px;
-            padding: 35px 25px;
-            background: linear-gradient(145deg, #ff416c, #ff4b2b);
-            border-radius: 35px;
+            padding: 25px;
+            background: linear-gradient(135deg, #1fb5ad 0%, #4a6edb 100%);
+            border-radius: 15px;
             color: white;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(255, 75, 43, 0.35);
+            box-shadow: 0 10px 25px rgba(31, 181, 173, 0.3);
+            z-index: 10;
         }
 
-        /* Shimmer Effect Background */
-        .main-card::before {
-            content: '';
+        .card-bg-logo {
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: rotate 10s linear infinite;
+            right: 15px;
+            top: 10px;
+            font-size: 80px;
+            font-weight: 900;
+            opacity: 0.1;
+            line-height: 1;
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .card-header-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
         }
 
-        .card-header { 
+        .card-label { 
             font-size: 13px; 
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-weight: 400;
             opacity: 0.9; 
-            margin-bottom: 8px; 
         }
         
         .balance-container {
             display: flex;
             align-items: baseline;
-            gap: 10px;
-            margin-bottom: 35px;
+            margin-bottom: 10px;
             position: relative;
             z-index: 2;
         }
 
-        .currency { font-size: 20px; font-weight: 600; opacity: 0.9; }
-        .balance-amount { font-size: 42px; font-weight: 800; letter-spacing: -1px; }
+        .currency { font-size: 24px; font-weight: 600; margin-right: 4px; }
+        .balance-amount { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
 
-        /* Modern Action Buttons (Glassmorphism) */
-        .card-actions {
+        /* --- SERVICES CARD (SEPARATED) --- */
+        .services-section {
+            background: white;
+            margin: 20px 15px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .services-header {
             display: flex;
             justify-content: space-between;
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 15px 10px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .action-btn {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 20px;
         }
 
-        .action-btn:active { transform: scale(0.9); }
+        .services-header h3 { font-size: 18px; font-weight: 800; color: #1a1a1a; }
+        .services-header span { font-size: 13px; color: #666; font-weight: 600; cursor: pointer; }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px 10px;
+            text-align: center;
+        }
+
+        .service-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
         
-        .action-btn i { 
-            background: rgba(255,255,255,0.25); 
-            padding: 10px; 
-            border-radius: 14px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .service-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2px;
+        }
+
+        .service-item span { font-size: 11px; font-weight: 700; color: #333; }
+
+        /* Icon Colors */
+        .bg-red-light { background: #fee2e2; color: #f87171; }
+        .bg-orange-light { background: #ffedd5; color: #fb923c; }
+        .bg-green-light { background: #dcfce7; color: #4ade80; }
+        .bg-blue-light { background: #dbeafe; color: #60a5fa; }
+
+        /* --- TRANSACTION SECTION (MODIFIED: NO CARD) --- */
+        .transaction-section { 
+            padding: 0 20px; /* Keep side padding for alignment */
+            background: transparent; /* Remove white background */
+            margin: 0 0 25px 0; /* Remove side margins that create the "floating" card look */
+            border-radius: 0; /* Remove rounded corners */
+            box-shadow: none; /* Remove shadow */
         }
         
-        .action-btn span { font-size: 12px; font-weight: 600; }
-
-        /* --- TRANSACTION LIST --- */
-        .transaction-section { padding: 30px 20px; }
-        .section-title { font-weight: 800; font-size: 18px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title { font-weight: 800; font-size: 18px; margin-bottom: 20px; color: #1a1a1a; }
         
         .tx-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f5f5f5;
+            margin-bottom: 18px;
         }
 
-        .tx-info { display: flex; gap: 14px; align-items: center; }
+        .tx-info { display: flex; gap: 12px; align-items: center; }
         .icon-circle { 
-            width: 48px; height: 48px; border-radius: 16px; 
+            width: 40px; height: 40px; border-radius: 12px; 
             display: flex; align-items: center; justify-content: center;
         }
         
-        .bg-blue { background: #eef5ff; color: #007aff; }
-        .bg-red { background: #fff0f0; color: #ff3b30; }
+        .bg-soft-blue { background: #fff; color: #4a6edb; border: 1px solid #e0e0e0; } /* Slight tweak to icons to pop on grey bg */
 
-        .tx-name { font-weight: 700; font-size: 15px; color: #1a1a1a; margin-bottom: 2px;}
-        .tx-time { font-size: 12px; color: #a0a0a0; }
+        .tx-name { font-weight: 700; font-size: 14px; color: #333; margin-bottom: 2px; }
+        .tx-time { font-size: 11px; color: #a0a0a0; font-weight: 500; }
         .tx-val { text-align: right; }
-        .tx-amount-text { font-weight: 800; font-size: 15px; color: #1a1a1a; margin-bottom: 2px; }
-        .tx-status { font-size: 11px; font-weight: 700; color: #4cd964; letter-spacing: 0.5px; }
-
-        /* Loading State */
-        .loading-shimmer {
-            animation: shimmer 1.5s infinite linear;
-            background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.1) 75%);
-            background-size: 200px 100%;
-            border-radius: 4px;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200px 0; }
-            100% { background-position: 200px 0; }
-        }
-
-        .loading { opacity: 0.6; pointer-events: none; filter: grayscale(0.5); }
+        .tx-amount-text { font-weight: 800; font-size: 14px; color: #1a1a1a; margin-bottom: 2px; }
+        .tx-id { font-size: 10px; font-weight: 700; color: #2ecc71; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div class="mobile-container" id="app">
         <header>
-            <div class="wallet-selector">
-                <i data-lucide="layout-grid" size="18"></i>
-                <span>Wallet 002</span>
-                <i data-lucide="chevron-down" size="18"></i>
+            <div class="logo-section">
+                <span class="logo-text">S</span>
+                <span style="font-size: 10px; font-weight: 800; color: #4a4e8a; margin-top: -4px;">snapay</span>
             </div>
-            <div class="notification-bell">
-                <i data-lucide="bell" size="22" style="color: #555;"></i>
+            <div class="header-actions">
+                <div class="notification-bell">
+                    <i data-lucide="bell" size="22" style="color: #333;"></i>
+                    <div class="badge">1</div>
+                </div>
+                <img src="https://i.pravatar.cc/150?u=snapay" class="profile-img" alt="Profile">
             </div>
         </header>
 
         <div class="main-card">
-            <p class="card-header">Available Float</p>
+            <div class="card-bg-logo">S</div>
+            <div class="card-header-row">
+                <span class="card-label">Your Balance</span>
+                <i data-lucide="eye" size="14" style="opacity: 0.8; cursor: pointer;"></i>
+            </div>
             <div class="balance-container">
-                <span class="currency">KES</span>
+                <span class="currency">$</span>
                 <span class="balance-amount" id="balance-display">
                     <% 
                     let displayBalance = '0.00';
                     if (typeof available_balance !== 'undefined') {
-                        displayBalance = Number(available_balance).toLocaleString();
+                        displayBalance = Number(available_balance).toLocaleString(undefined, {minimumFractionDigits: 2});
                     } else if (typeof balance !== 'undefined') {
-                        displayBalance = Number(balance).toLocaleString();
+                        displayBalance = Number(balance).toLocaleString(undefined, {minimumFractionDigits: 2});
                     }
                     %>
                     <%= displayBalance %>
                 </span>
             </div>
-            
-            <div class="card-actions">
-                <div class="action-btn" onclick="pullLatestData()">
-                    <i data-lucide="refresh-cw" size="20"></i>
-                    <span>Pull Info</span>
-                </div>
-                <div class="action-btn">
-                    <i data-lucide="arrow-down-left" size="20"></i>
-                    <span>Receive</span>
-                </div>
-                <div class="action-btn">
-                    <i data-lucide="repeat" size="20"></i>
-                    <span>Swap</span>
-                </div>
-            </div>
         </div>
 
-        <section class="transaction-section">
-            <div class="section-title">
-                <span>Transactions</span>
-                <span style="color: #ff416c; font-size: 13px; font-weight: 700; cursor: pointer;">View All</span>
+        <section class="services-section">
+            <div class="services-header">
+                <h3>Services</h3>
+                <span>See all</span>
             </div>
+            <div class="services-grid">
+                <div class="service-item">
+                    <div class="service-icon bg-red-light"><i data-lucide="zap" size="20"></i></div>
+                    <span>Electricity</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon bg-orange-light"><i data-lucide="wifi" size="20"></i></div>
+                    <span>Internet</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon bg-green-light"><i data-lucide="smartphone" size="20"></i></div>
+                    <span>Phone</span>
+                </div>
+                <div class="service-item">
+                    <div class="service-icon bg-blue-light"><i data-lucide="shield-check" size="20"></i></div>
+                    <span>Insurance</span>
+                </div>
+            </div>
+        </section>
 
+        <section class="transaction-section">
+            <div class="section-title">Recent History</div>
             <div id="tx-list">
                 <% if (typeof transactions !== 'undefined' && transactions.length > 0) { %>
                     <% transactions.forEach(tx => { %>
                         <div class="tx-item">
                             <div class="tx-info">
-                                <div class="icon-circle bg-blue">
-                                    <i data-lucide="arrow-down-left" size="22"></i>
+                                <div class="icon-circle bg-soft-blue">
+                                    <i data-lucide="arrow-down-left" size="18"></i>
                                 </div>
                                 <div>
-                                    <p class="tx-name"><%= tx.CustomerName || 'M-Pesa User' %></p>
-                                    <p class="tx-time"><%= tx.PhoneNumber %> • <%= tx.TransactionDate %></p>
+                                    <p class="tx-name">MPESA - <%= tx.PhoneNumber %></p>
+                                    <p class="tx-time">Jan 10, 2026 • 10:33</p>
                                 </div>
                             </div>
                             <div class="tx-val">
                                 <p class="tx-amount-text">KES <%= Number(tx.Amount).toLocaleString() %></p>
-                                <p class="tx-status"><%= tx.MpesaReceiptNumber %></p>
+                                <p class="tx-id">UA<%= Math.random().toString(36).substr(2, 7).toUpperCase() %></p>
                             </div>
                         </div>
                     <% }); %>
                 <% } else { %>
-                    <div style="padding: 60px 20px; text-align: center;">
-                        <i data-lucide="inbox" size="48" style="color: #eee; margin-bottom: 15px;"></i>
-                        <p style="color: #bbb; font-size: 14px; font-weight: 500;">No transactions found.<br>Pull Info to refresh.</p>
+                    <div style="padding: 20px; text-align: center;">
+                        <p style="color: #bbb; font-size: 13px; font-weight: 500;">No recent transactions found.</p>
                     </div>
                 <% } %>
             </div>
@@ -276,20 +311,7 @@
     </div>
 
     <script>
-        // Initialize Icons
         lucide.createIcons();
-
-        async function pullLatestData() {
-            const balanceEl = document.getElementById('balance-display');
-            const appContainer = document.getElementById('app');
-            
-            appContainer.classList.add('loading');
-            balanceEl.classList.add('loading-shimmer');
-            balanceEl.innerText = "REFRESHING...";
-
-            // Reloads current page to trigger backend controller
-            location.reload();
-        }
     </script>
 </body>
 </html>

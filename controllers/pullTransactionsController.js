@@ -17,22 +17,29 @@ const pullTransactions = {
             const auth = await getAccessToken(); 
             const shortCode = process.env.MPESA_STORE_NUMBER?.trim() || process.env.BusinessShortCode?.trim();
             
-            // --- STATUM BALANCE INTEGRATION (FIXED TO USE SERVICE) ---
+            // --- STATUM V2 BALANCE INTEGRATION ---
             let statumBalance = "0.00";
+            let organizationName = "Statum Account";
+            let topUpCode = "N/A";
+            let apiStatus = "Active";
+
             try {
-                // Fetching data from the smart service we updated
                 const balanceData = await getStatumBalance();
                 
-                // Statum v2 usually returns 'available_balance', v1 used 'balance'
-                // We handle both to be safe
-                if (balanceData) {
-                    statumBalance = balanceData.available_balance || balanceData.balance || balanceData.data?.balance || "0.00";
+                // Check if balanceData exists and isn't an error string
+                if (balanceData && typeof balanceData === 'object') {
+                    const details = balanceData.organization?.details;
+                    
+                    statumBalance = details?.available_balance || "0.00";
+                    organizationName = balanceData.organization?.name || "Statum User";
+                    topUpCode = details?.mpesa_account_top_up_code || "N/A";
+                    
+                    console.log(`[STATUM] Data Fetched: KES ${statumBalance}`);
                 }
-                
-                console.log(`[STATUM] Sync Successful: KES ${statumBalance}`);
             } catch (balanceError) {
-                console.error("[STATUM SYNC ERROR]: Dashboard failed to fetch balance.");
-                statumBalance = "0.00";
+                // This catches the 404 without breaking the rest of the dashboard
+                console.warn("[STATUM] Balance path locked or 404. Check permissions.");
+                apiStatus = "Balance Pending Support";
             }
 
             // --- SAFARICOM PULL ---
@@ -58,7 +65,7 @@ const pullTransactions = {
             // Process Sync and Airtime
             for (const tx of mpesaTransactions) {
                 if (!localReceipts.has(tx.MpesaReceiptNumber)) {
-                    console.log(`[SYNCING] Found new transaction: ${tx.MpesaReceiptNumber} from ${tx.PhoneNumber}`);
+                    console.log(`[SYNCING] Found new transaction: ${tx.MpesaReceiptNumber}`);
                     
                     const { error: dbError } = await supabase.from('transactions').upsert([{
                         checkout_request_id: tx.MpesaReceiptNumber,
@@ -69,37 +76,35 @@ const pullTransactions = {
                         service_name: 'Auto-Sync Pull'
                     }], { onConflict: 'checkout_request_id' });
 
-                    if (!dbError) {
-                        if (parseFloat(tx.Amount) >= 5) {
-                            console.log(`[AIRTIME] Triggering for ${tx.PhoneNumber} (KES ${tx.Amount})...`);
-                            sendAirtime(tx.PhoneNumber, tx.Amount)
-                                .then(() => console.log(`[AIRTIME SUCCESS] Delivered to ${tx.PhoneNumber}`))
-                                .catch(e => console.error(`[AIRTIME FAILURE] Could not send to ${tx.PhoneNumber}:`, e.message));
-                        } else {
-                            console.log(`[AIRTIME SKIP] Amount KES ${tx.Amount} is too low for ${tx.PhoneNumber}`);
-                        }
-                    } else {
-                        console.error(`[DB ERROR] Could not save transaction ${tx.MpesaReceiptNumber}:`, dbError.message);
+                    if (!dbError && parseFloat(tx.Amount) >= 5) {
+                        sendAirtime(tx.PhoneNumber, tx.Amount)
+                            .then(() => console.log(`[AIRTIME SUCCESS] ${tx.PhoneNumber}`))
+                            .catch(e => console.error(`[AIRTIME FAILURE] ${tx.PhoneNumber}:`, e.message));
                     }
                 }
             }
 
-            // --- CRITICAL FIX FOR AUTO-SYNC ---
-            if (typeof res.render !== 'function') {
-                return; 
-            }
+            if (typeof res.render !== 'function') return; 
 
+            // Pass everything to the view
             res.render('index', { 
                 transactions: mpesaTransactions, 
                 balance: statumBalance, 
-                available_balance: statumBalance, 
+                available_balance: statumBalance,
+                org_name: organizationName,
+                mpesa_code: topUpCode,
+                api_status: apiStatus, // Useful for showing a "Pending" label on UI
                 title: "Auri Pay Reconciliation", 
                 error: null 
             });
+
         } catch (error) {
             console.error("Critical Dashboard Error:", error.message);
             if (typeof res.render === 'function') {
-                res.status(500).render('index', { transactions: [], balance: "0.00", available_balance: "0.00", error: error.message });
+                res.status(500).render('index', { 
+                    transactions: [], balance: "0.00", available_balance: "0.00", 
+                    org_name: "System Error", mpesa_code: "N/A", error: error.message 
+                });
             }
         }
     },
