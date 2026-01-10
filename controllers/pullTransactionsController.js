@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { supabase } from '../config/supabaseClient.js'; 
 import { getAccessToken } from '../middlewares/authorization.js'; 
-import { sendAirtime } from '../services/airtimeService.js';
+import { sendAirtime, getStatumBalance } from '../services/airtimeService.js'; 
 
 const pullTransactions = {
     getPullDashboard: async (req, res) => {
@@ -17,6 +17,25 @@ const pullTransactions = {
             const auth = await getAccessToken(); 
             const shortCode = process.env.MPESA_STORE_NUMBER?.trim() || process.env.BusinessShortCode?.trim();
             
+            // --- STATUM BALANCE INTEGRATION (FIXED TO USE SERVICE) ---
+            let statumBalance = "0.00";
+            try {
+                // Fetching data from the smart service we updated
+                const balanceData = await getStatumBalance();
+                
+                // Statum v2 usually returns 'available_balance', v1 used 'balance'
+                // We handle both to be safe
+                if (balanceData) {
+                    statumBalance = balanceData.available_balance || balanceData.balance || balanceData.data?.balance || "0.00";
+                }
+                
+                console.log(`[STATUM] Sync Successful: KES ${statumBalance}`);
+            } catch (balanceError) {
+                console.error("[STATUM SYNC ERROR]: Dashboard failed to fetch balance.");
+                statumBalance = "0.00";
+            }
+
+            // --- SAFARICOM PULL ---
             const response = await axios.post(`https://api.safaricom.co.ke/pulltransactions/v1/query`, 
                 { ShortCode: shortCode, StartDate: startDate, EndDate: endDate, OffSetValue: "0" },
                 { headers: { 'Authorization': `Bearer ${auth}`, 'Content-Type': 'application/json' }}
@@ -25,11 +44,11 @@ const pullTransactions = {
             let mpesaTransactions = [];
             if (response.data?.Response?.[0]) {
                 mpesaTransactions = response.data.Response[0].map(tx => ({
-                    MpesaReceiptNumber: tx.transactionId,
-                    Amount: tx.amount,
-                    PhoneNumber: tx.msisdn,
-                    CustomerName: tx.sender,
-                    TransactionDate: tx.trxDate
+                    MpesaReceiptNumber: tx.transactionId || tx.MpesaReceiptNumber,
+                    Amount: tx.amount || tx.Amount,
+                    PhoneNumber: tx.msisdn || tx.PhoneNumber,
+                    CustomerName: tx.sender || tx.CustomerName || 'M-Pesa User',
+                    TransactionDate: tx.trxDate || tx.TransactionDate
                 }));
             }
 
@@ -39,7 +58,7 @@ const pullTransactions = {
             // Process Sync and Airtime
             for (const tx of mpesaTransactions) {
                 if (!localReceipts.has(tx.MpesaReceiptNumber)) {
-                    console.log(`[SYNCING] Found missing TX: ${tx.MpesaReceiptNumber}`);
+                    console.log(`[SYNCING] Found new transaction: ${tx.MpesaReceiptNumber} from ${tx.PhoneNumber}`);
                     
                     const { error: dbError } = await supabase.from('transactions').upsert([{
                         checkout_request_id: tx.MpesaReceiptNumber,
@@ -50,15 +69,38 @@ const pullTransactions = {
                         service_name: 'Auto-Sync Pull'
                     }], { onConflict: 'checkout_request_id' });
 
-                    if (!dbError && parseFloat(tx.Amount) >= 5) {
-                        sendAirtime(tx.PhoneNumber, tx.Amount).catch(e => console.log("Airtime Background Error"));
+                    if (!dbError) {
+                        if (parseFloat(tx.Amount) >= 5) {
+                            console.log(`[AIRTIME] Triggering for ${tx.PhoneNumber} (KES ${tx.Amount})...`);
+                            sendAirtime(tx.PhoneNumber, tx.Amount)
+                                .then(() => console.log(`[AIRTIME SUCCESS] Delivered to ${tx.PhoneNumber}`))
+                                .catch(e => console.error(`[AIRTIME FAILURE] Could not send to ${tx.PhoneNumber}:`, e.message));
+                        } else {
+                            console.log(`[AIRTIME SKIP] Amount KES ${tx.Amount} is too low for ${tx.PhoneNumber}`);
+                        }
+                    } else {
+                        console.error(`[DB ERROR] Could not save transaction ${tx.MpesaReceiptNumber}:`, dbError.message);
                     }
                 }
             }
 
-            res.render('pull_dashboard', { transactions: mpesaTransactions, title: "M-Pesa Reconciliation", error: null });
+            // --- CRITICAL FIX FOR AUTO-SYNC ---
+            if (typeof res.render !== 'function') {
+                return; 
+            }
+
+            res.render('index', { 
+                transactions: mpesaTransactions, 
+                balance: statumBalance, 
+                available_balance: statumBalance, 
+                title: "Auri Pay Reconciliation", 
+                error: null 
+            });
         } catch (error) {
-            res.status(500).render('pull_dashboard', { transactions: [], error: error.message });
+            console.error("Critical Dashboard Error:", error.message);
+            if (typeof res.render === 'function') {
+                res.status(500).render('index', { transactions: [], balance: "0.00", available_balance: "0.00", error: error.message });
+            }
         }
     },
 

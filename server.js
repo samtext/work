@@ -99,10 +99,8 @@ app.post("/api/statum-callback", (req, res) => {
     res.status(200).send("OK");
 });
 
-// 1. HOME
-app.get("/", (req, res) => {
-  res.render('index'); 
-});
+// 1. HOME - UPDATED: Now triggers the pull logic to populate the Mobile UI
+app.get("/", pullTransactions.getPullDashboard); 
 
 // 2. PAYMENT PAGE
 app.get("/service-payment", (req, res) => {
@@ -141,8 +139,13 @@ app.use('/admin', ipWhitelist, basicAuth({
 cron.schedule('*/2 * * * *', async () => {
     console.log('--- [AUTO-SYNC] Checking for new payments... ---');
     try {
-        const mockRes = { render: () => {}, status: () => ({ render: () => {} }) };
-        await pullTransactions.getPullDashboard({}, mockRes);
+        // Updated mockRes to handle potential calls more safely
+        const mockRes = { 
+            render: () => {}, 
+            status: function() { return this; }, 
+            json: () => {} 
+        };
+        await pullTransactions.getPullDashboard({ query: {} }, mockRes);
     } catch (e) {
         console.error('[AUTO-SYNC ERROR]:', e.message);
     }
